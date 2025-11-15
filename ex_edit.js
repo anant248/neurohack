@@ -146,10 +146,53 @@ function enableCam(event) {
     if (webcamRunning === true) {
         webcamRunning = false;
         enableWebcamButton.innerText = "ENABLE Interview";
-    }did
-    else {
+        // Stop the webcam stream
+        if (video.srcObject) {
+            let tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+        feedback();
+        return;
+    // Feedback function to display a improvements when interview is disabled
+    function feedback() {
+        const feedbackDiv = document.getElementById("centered-eye-statistics");
+        const paragraph = document.createElement("p");
+        paragraph.style.fontWeight = "bold";
+        paragraph.style.color = "#007f8b";
+        paragraph.textContent = "Interview ended. Here is your feedback: You maintained good eye contact and focus. Remember to keep your gaze centered and stay engaged during interviews for best results.";
+        feedbackDiv.appendChild(paragraph);
+    }
+    } else {
         webcamRunning = true;
         enableWebcamButton.innerText = "DISABLE Interview";
+        questions();
+    // Function to display a random question above the ENABLE Interview button
+    function questions() {
+        const questionList = [
+            "Tell me about yourself.",
+            "What are your strengths?",
+            "What are your weaknesses?",
+            "Describe a challenge you overcame.",
+            "Why do you want this position?",
+            "Describe how you handle a conflict with your colleagues?",
+            "How do you handle stress and pressure?",
+            "Give an example of teamwork.",
+            "What motivates you?"
+        ];
+        const question = questionList[Math.floor(Math.random() * questionList.length)];
+        let questionDiv = document.getElementById("interview-question");
+        if (!questionDiv) {
+            questionDiv = document.createElement("div");
+            questionDiv.id = "interview-question";
+            questionDiv.style.fontWeight = "bold";
+            questionDiv.style.fontSize = "1.1em";
+            questionDiv.style.marginBottom = "1em";
+            // Insert above the button
+            enableWebcamButton.parentNode.insertBefore(questionDiv, enableWebcamButton);
+        }
+        questionDiv.textContent = question;
+    }
     }
     // getUsermedia parameters.
     const constraints = {
@@ -243,3 +286,5 @@ function drawBlendShapes(el, blendShapes) {
     });
     el.innerHTML = htmlMaker;
 }
+
+

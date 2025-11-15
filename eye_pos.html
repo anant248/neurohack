@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Gaze Detection</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the "pupil" to make it move smoothly */
+        .pupil {
+            transition: all 0.05s linear;
+            will-change: transform;
+        }
+        /* Hide the video element, we only need it as an input source */
+        .input_video {
+            display: none;
+        }
+        .output_canvas {
+            max-width: 500px;
+            width: 100%;
+            border-radius: 1rem;
+            border: 2px solid #4b5563; /* gray-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <h1 class="text-4xl font-bold text-cyan-400 mb-2">Live Gaze Detection</h1>
+        <p class="text-lg text-gray-400 mb-6">Allow webcam access to begin</p>
+
+        <div class="w-full max-w-4xl p-6 bg-gray-800 rounded-2xl shadow-xl">
+            
+            <!-- This container holds the two cartoon eyes -->
+            <div class="flex justify-center items-center space-x-8 mb-6 h-48">
+                <!-- Left Eye -->
+                <div class="w-40 h-40 bg-white rounded-full flex items-center justify-center border-4 border-gray-600 relative overflow-hidden">
+                    <div id="pupil-left" class="pupil w-16 h-16 bg-gray-900 rounded-full border-2 border-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
+                <!-- Right Eye -->
+                <div class="w-40 h-40 bg-white rounded-full flex items-center justify-center border-4 border-gray-600 relative overflow-hidden">
+                    <div id="pupil-right" class="pupil w-16 h-16 bg-gray-900 rounded-full border-2 border-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
+            </div>
+            
+            <p class="text-center text-gray-400 mb-4">
+                This demo tracks your iris position and moves the eyes above in real-time.
+            </p>
+
+            <!-- Container for Video and Canvas -->
+            <div class="relative w-full max-w-lg mx-auto">
+                <!-- The video element (hidden) where the webcam feed goes -->
+                <video class="input_video"></video>
+                <!-- The canvas element where we will draw the debug output (the face mesh) -->
+                <canvas class="output_canvas" width="1280" height="720"></canvas>
+            </div>
+            
+            <p class="text-center text-xs text-gray-500 mt-4">
+                The video above shows the 478 landmarks (including iris) detected by MediaPipe.
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. Load MediaPipe libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <!-- 3. Main Application Logic -->
+    <script type="module">
+        // Get references to all the DOM elements we'll need
+        const videoElement = document.querySelector('.input_video');
+        const canvasElement = document.querySelector('.output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const pupilLeft = document.getElementById('pupil-left');
+        const pupilRight = document.getElementById('pupil-right');
+
+        // Helper function to find the relative position of the pupil
+        // This function calculates where (from 0.0 to 1.0) the pupil is
+        // inside the bounding box of the eye.
+        function getRelativePupilPosition(pupil, eyeTop, eyeBottom, eyeLeft, eyeRight) {
+            const eyeWidth = eyeRight.x - eyeLeft.x;
+            const eyeHeight = eyeBottom.y - eyeTop.y;
+            
+            const relativeX = (pupil.x - eyeLeft.x) / eyeWidth;
+            const relativeY = (pupil.y - eyeTop.y) / eyeHeight;
+            
+            return { x: relativeX, y: relativeY };
+        }
+
+        // This function will be called every time MediaPipe processes a frame
+        function onResults(results) {
+            // Clear the canvas
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+            // Check if any face landmarks were found
+            if (results.multi_face_landmarks && results.multi_face_landmarks.length > 0) {
+                // Get the landmarks for the first face found
+                const faceLandmarks = results.multi_face_landmarks[0];
+
+                // 
+                // These are the specific landmark indices we need.
+                // MediaPipe provides 478 landmarks when `refineLandmarks` is true.
+                const L_PUPIL = 473; // Left Iris Center
+                const L_TOP = 159;
+                const L_BOTTOM = 145;
+                const L_LEFT = 33;
+                const L_RIGHT = 133;
+                
+                const R_PUPIL = 468; // Right Iris Center
+                const R_TOP = 386;
+                const R_BOTTOM = 374;
+                const R_LEFT = 362;
+                const R_RIGHT = 263;
+
+                // Calculate the relative position for each pupil
+                const leftPos = getRelativePupilPosition(
+                    faceLandmarks[L_PUPIL],
+                    faceLandmarks[L_TOP],
+                    faceLandmarks[L_BOTTOM],
+                    faceLandmarks[L_LEFT],
+                    faceLandmarks[L_RIGHT]
+                );
+                
+                const rightPos = getRelativePupilPosition(
+                    faceLandmarks[R_PUPIL],
+                    faceLandmarks[R_TOP],
+                    faceLandmarks[R_BOTTOM],
+                    faceLandmarks[R_LEFT],
+                    faceLandmarks[R_RIGHT]
+                );
+
+                // --- Update the on-screen "pupils" ---
+                // We convert the 0.0-1.0 position to a percentage for CSS.
+                // We use '50%' as the center, so we offset the percentage.
+                // (pos - 0.5) * 100 gives a range from -50% to +50%.
+                // We multiply by 1.5 for a slightly more pronounced effect.
+                const leftPupilX = 50 + (leftPos.x - 0.5) * 100 * 1.5;
+                const leftPupilY = 50 + (leftPos.y - 0.5) * 100 * 1.5;
+                const rightPupilX = 50 + (rightPos.x - 0.5) * 100 * 1.5;
+                const rightPupilY = 50 + (rightPos.y - 0.5) * 100 * 1.5;
+
+                // Set the CSS 'left' and 'top' properties of the pupil divs
+                pupilLeft.style.left = `${leftPupilX}%`;
+                pupilLeft.style.top = `${leftPupilY}%`;
+                pupilRight.style.left = `${rightPupilX}%`;
+                pupilRight.style.top = `${rightPupilY}%`;
+
+                // --- Draw the debug mesh on the canvas ---
+                // This draws all 478 landmarks on the video feed
+                for (const landmarks of results.multi_face_landmarks) {
+                    // Draw the mesh tesselation
+                    window.drawConnectors(canvasCtx, landmarks, window.FACEMESH_TESSELATION,
+                                     {color: '#C0C0C070', lineWidth: 1});
+                    // Draw the iris landmarks
+                    window.drawConnectors(canvasCtx, landmarks, window.FACEMESH_LEFT_IRIS,
+                                     {color: '#FF8000', lineWidth: 2});
+                    window.drawConnectors(canvasCtx, landmarks, window.FACEMESH_RIGHT_IRIS,
+                                     {color: '#00FF80', lineWidth: 2});
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        // --- Initialize MediaPipe FaceMesh ---
+        const faceMesh = new window.FaceMesh({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+            }
+        });
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true, // <-- This is CRUCIAL for iris tracking
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        // Set the onResults function as the callback
+        faceMesh.onResults(onResults);
+
+        // --- Initialize the Webcam ---
+        const camera = new window.Camera(videoElement, {
+            onFrame: async () => {
+                // Send the video frame to MediaPipe for processing
+                await faceMesh.send({ image: videoElement });
+            },
+            width: 1280,
+            height: 720
+        });
+        
+        // Start the camera
+        camera.start();
+    </script>
+</body>
+</html>

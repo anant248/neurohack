@@ -6,8 +6,15 @@ import "./styles.css";
 declare global {
   interface Window {
     startWebcamTracking: () => void;
-    stopWebcamTracking: () => Promise<unknown>;
+    stopWebcamTracking: () => Promise<any>;
   }
+}
+
+interface SessionScore {
+  attempt: number;
+  eyeContactScore: number;
+  expressionScore: number;
+  timestamp: Date;
 }
 
 export default function FaceLandmarkerPage() {
@@ -15,7 +22,10 @@ export default function FaceLandmarkerPage() {
   const [recording, setRecording] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessionHistory, setSessionHistory] = useState<SessionScore[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<any>(null);
 
   // -------------------------
   // INTERVIEW QUESTIONS
@@ -41,6 +51,128 @@ export default function FaceLandmarkerPage() {
     };
     load();
   }, []);
+
+  // Initialize chart when history modal opens
+  useEffect(() => {
+    if (showHistory && sessionHistory.length > 0) {
+      const initChart = async () => {
+        const Chart = (await import('chart.js/auto')).default;
+        const chartCanvas = document.getElementById('historyChart') as HTMLCanvasElement;
+        
+        if (chartCanvas && !chartRef.current) {
+          const ctx = chartCanvas.getContext('2d');
+          if (ctx) {
+            chartRef.current = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: sessionHistory.map(s => `Attempt ${s.attempt}`),
+                datasets: [
+                  {
+                    label: 'Eye Contact',
+                    data: sessionHistory.map(s => s.eyeContactScore),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                  },
+                  {
+                    label: 'Expression',
+                    data: sessionHistory.map(s => s.expressionScore),
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                      color: '#fff',
+                      font: {
+                        size: 14,
+                        family: 'Inter'
+                      },
+                      padding: 20,
+                      usePointStyle: true,
+                    }
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    displayColors: true,
+                    callbacks: {
+                      label: function(context) {
+                        return context.dataset.label + ': ' + context.parsed.y + '%';
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      font: {
+                        size: 12
+                      },
+                      callback: function(value) {
+                        return value + '%';
+                      }
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)',
+                    }
+                  },
+                  x: {
+                    ticks: {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)',
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      };
+      
+      initChart();
+    }
+    
+    // Cleanup chart when modal closes
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+    };
+  }, [showHistory, sessionHistory]);
 
   // Draw placeholder on canvas
   useEffect(() => {
@@ -101,11 +233,68 @@ export default function FaceLandmarkerPage() {
     const scores = await window.stopWebcamTracking(); // returns metrics
     setResults(scores);
 
+    // Add to session history
+    setSessionHistory(prev => [...prev, {
+      attempt: prev.length + 1,
+      eyeContactScore: scores.eyeContactScore,
+      expressionScore: scores.expressionScore,
+      timestamp: new Date()
+    }]);
+
     setAnalyzing(false);
   };
 
   return (
     <div className="container">
+      {/* History Button - Fixed Position */}
+      {sessionHistory.length > 0 && (
+        <button className="history-btn" onClick={() => setShowHistory(true)}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3v8h8M21 21v-8h-8M3 11c0-4.97 4.03-9 9-9 2.5 0 4.74 1.01 6.36 2.64M21 13c0 4.97-4.03 9-9 9-2.5 0-4.74-1.01-6.36-2.64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          View History ({sessionHistory.length})
+        </button>
+      )}
+
+      {/* History Modal */}
+      {showHistory && (
+        <div className="modal-overlay" onClick={() => setShowHistory(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Session Progress</h2>
+              <button className="modal-close" onClick={() => setShowHistory(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="chart-container">
+              <canvas id="historyChart"></canvas>
+            </div>
+
+            <div className="history-stats">
+              <div className="stat-card">
+                <span className="stat-label">Total Attempts</span>
+                <span className="stat-value">{sessionHistory.length}</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Avg Eye Contact</span>
+                <span className="stat-value">
+                  {Math.round(sessionHistory.reduce((sum, s) => sum + s.eyeContactScore, 0) / sessionHistory.length)}%
+                </span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Avg Expression</span>
+                <span className="stat-value">
+                  {Math.round(sessionHistory.reduce((sum, s) => sum + s.expressionScore, 0) / sessionHistory.length)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="header-section">
         <div className="icon-badge">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

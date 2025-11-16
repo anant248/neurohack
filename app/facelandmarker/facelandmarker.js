@@ -90,7 +90,7 @@ async function predictLoop() {
     // Compute smile score
     const leftSmile = categories.find(c => c.categoryName === "mouthSmileLeft")?.score || 0;
     const rightSmile = categories.find(c => c.categoryName === "mouthSmileRight")?.score || 0;
-    const smiling = (leftSmile + rightSmile) / 2 > 0.3;
+    const smiling = (leftSmile + rightSmile) / 2 > 0.2;
 
     // push frame data
     landmarkHistory.push({
@@ -106,19 +106,19 @@ async function predictLoop() {
 // --------------------------------------------------
 // eye contact check
 // --------------------------------------------------
-function eyesAreCentered(categories, threshold = 0.2) {
+function eyesAreCentered(categories, thresholdUpDown = 0.6, thresholdLeftRight = 0.4) {
   const scores = {};
   categories.forEach(s => (scores[s.categoryName] = s.score));
 
   return (
-    scores.eyeLookDownLeft < threshold &&
-    scores.eyeLookDownRight < threshold &&
-    scores.eyeLookInLeft < threshold &&
-    scores.eyeLookInRight < threshold &&
-    scores.eyeLookOutLeft < threshold &&
-    scores.eyeLookOutRight < threshold &&
-    scores.eyeLookUpLeft < threshold &&
-    scores.eyeLookUpRight < threshold
+    scores.eyeLookDownLeft < thresholdUpDown &&
+    scores.eyeLookDownRight < thresholdUpDown &&
+    scores.eyeLookInLeft < thresholdLeftRight &&
+    scores.eyeLookInRight < thresholdLeftRight &&
+    scores.eyeLookOutLeft < thresholdLeftRight &&
+    scores.eyeLookOutRight < thresholdLeftRight &&
+    scores.eyeLookUpLeft < thresholdUpDown &&
+    scores.eyeLookUpRight < thresholdUpDown
   );
 }
 

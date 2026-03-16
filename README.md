@@ -2,6 +2,8 @@
 
 A Human Computer Interface (HCI) that helps users get better at interviewing, by tracking eye contact and facial expression to common interview prompts. The generated feedback extrapolates from the facial expressions to give detailed insights encouranging users to confidently express themselves and manage interview skills.
 
+Try it out here! > https://neurohack25.vercel.app/facelandmarker
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

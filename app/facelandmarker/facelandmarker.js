@@ -90,7 +90,7 @@ async function predictLoop() {
     // Compute smile score
     const leftSmile = categories.find(c => c.categoryName === "mouthSmileLeft")?.score || 0;
     const rightSmile = categories.find(c => c.categoryName === "mouthSmileRight")?.score || 0;
-    const smiling = (leftSmile + rightSmile) / 2 > 0.2;
+    const smiling = (leftSmile + rightSmile) > 0.2;
 
     // push frame data
     landmarkHistory.push({

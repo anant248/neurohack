@@ -45,7 +45,7 @@ describe("POST /api/feedback", () => {
     expect(json).toEqual({ feedback: "Great eye contact and warm expression!" })
   })
 
-  it("passes previousScores through to the model", async () => {
+  it("passes previousScores through to the model and excludes question text", async () => {
     const req = makeRequest({
       eyeContactScore: 80,
       expressionScore: 70,
@@ -56,7 +56,9 @@ describe("POST /api/feedback", () => {
     expect(mockGenerateContent).toHaveBeenCalledOnce()
     const [[prompt]] = mockGenerateContent.mock.calls
     expect(typeof prompt).toBe("string")
-    expect(prompt).toContain("Describe a challenge.")
+    // Question text must NOT appear — AI must not infer verbal content
+    expect(prompt).not.toContain("Describe a challenge.")
+    // Progress delta MUST appear
     expect(prompt).toContain("Progress since last attempt")
   })
 

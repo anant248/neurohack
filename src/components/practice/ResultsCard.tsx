@@ -6,10 +6,13 @@ import { Card } from "@/components/ui/Card"
 
 interface ResultsCardProps {
   results: FeedbackResult
+  isAiLoading: boolean
   onReset: () => void
 }
 
-export function ResultsCard({ results, onReset }: ResultsCardProps) {
+export function ResultsCard({ results, isAiLoading, onReset }: ResultsCardProps) {
+  const displayFeedback = results.aiFeedback ?? results.feedback
+
   return (
     <Card variant="results">
       <div className="results-header">
@@ -58,8 +61,19 @@ export function ResultsCard({ results, onReset }: ResultsCardProps) {
       </div>
 
       <div className="feedback-section">
-        <h3 className="feedback-title">AI Feedback</h3>
-        <p className="feedback-text">{results.feedback}</p>
+        <h3 className="feedback-title">
+          {isAiLoading ? "AI Coach is thinking…" : results.aiFeedback ? "AI Coach Feedback" : "Feedback"}
+        </h3>
+
+        {isAiLoading ? (
+          <div className="feedback-skeleton" aria-busy="true" aria-label="Loading AI feedback">
+            <div className="skeleton-line skeleton-line--long" />
+            <div className="skeleton-line skeleton-line--medium" />
+            <div className="skeleton-line skeleton-line--short" />
+          </div>
+        ) : (
+          <p className="feedback-text">{displayFeedback}</p>
+        )}
       </div>
 
       <Button variant="ghost" onClick={onReset} type="button">

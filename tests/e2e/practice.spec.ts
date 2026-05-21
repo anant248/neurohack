@@ -2,6 +2,15 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Practice page", () => {
   test.beforeEach(async ({ page }) => {
+    // Stub the AI feedback API so E2E tests don't hit Gemini
+    await page.route("/api/feedback", route =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ feedback: "Great job maintaining eye contact! Try smiling a bit more." }),
+      }),
+    )
+
     await page.goto("/practice")
   })
 

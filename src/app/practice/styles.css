@@ -183,15 +183,29 @@ body {
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   background: #000;
-  aspect-ratio: 4/3;
+  aspect-ratio: 16/9;
 }
 
-#webcam,
-#output_canvas {
+/* Both elements fill the wrapper and layer on top of each other */
+.video-wrapper video,
+.video-wrapper canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* Video fills with cover so it never has black bars */
+.video-wrapper video {
   object-fit: cover;
+  z-index: 1;
+}
+
+/* Canvas sits on top for landmark/overlay drawing */
+.video-wrapper canvas {
+  z-index: 2;
 }
 
 .recording-indicator {

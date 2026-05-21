@@ -25,16 +25,23 @@ export function VideoCapture({
   onStart,
   onStop,
 }: VideoCaptureProps) {
-  // Draw placeholder when not recording
+  // Draw placeholder when not recording; clear to transparent when recording
+  // so the live video underneath shows through.
   useEffect(() => {
-    if (isRecording || !canvasRef.current) return
-
     const canvas = canvasRef.current
+    if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    canvas.width = 640
-    canvas.height = 480
+    if (isRecording) {
+      // Make canvas transparent — the video element below shows through
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      return
+    }
+
+    // Idle state: draw placeholder graphic
+    canvas.width = 1280
+    canvas.height = 720
 
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
     gradient.addColorStop(0, "#1a1a2e")
@@ -55,12 +62,12 @@ export function VideoCapture({
     ctx.stroke()
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
-    ctx.font = "20px Inter, system-ui, sans-serif"
+    ctx.font = "28px Inter, system-ui, sans-serif"
     ctx.textAlign = "center"
     ctx.fillText("Ready to begin your interview", canvas.width / 2, canvas.height / 2 + 80)
-    ctx.font = "14px Inter, system-ui, sans-serif"
+    ctx.font = "18px Inter, system-ui, sans-serif"
     ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
-    ctx.fillText('Click "Start Recording" when ready', canvas.width / 2, canvas.height / 2 + 110)
+    ctx.fillText('Click "Start Recording" when ready', canvas.width / 2, canvas.height / 2 + 120)
   }, [isRecording, canvasRef])
 
   const canStart = isReady && hasQuestion && !isRecording && !isAnalyzing
@@ -77,14 +84,10 @@ export function VideoCapture({
       </p>
 
       <div className="video-wrapper">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          style={{ display: isRecording ? "block" : "none" }}
-        />
-        <canvas ref={canvasRef} id="output_canvas" />
+        {/* Video sits below the canvas; stream only flows when recording */}
+        <video ref={videoRef} autoPlay muted playsInline />
+        {/* Canvas is always on top: placeholder when idle, transparent when recording */}
+        <canvas ref={canvasRef} />
         {isRecording && (
           <div className="recording-indicator">
             <span className="recording-dot" />

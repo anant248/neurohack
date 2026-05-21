@@ -87,11 +87,14 @@ body {
   border-radius: 4px;
 }
 
-/* Right panel: video fills available height */
+/* Right panel: video centred, not stretched */
 .practice-right {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 0;
+  padding: 8px 0;
 }
 
 /* ==================== QUESTION PANEL ==================== */
@@ -362,13 +365,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
+  width: 100%;
+  max-width: 560px; /* keep video a comfortable size, not wall-to-wall */
 }
 
 .video-wrapper {
   position: relative;
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;  /* fixed proportion; height derives from width */
   border-radius: 16px;
   overflow: hidden;
   background: #000;
@@ -753,13 +757,7 @@ body {
   }
 
   .video-panel {
-    height: auto;
-  }
-
-  .video-wrapper {
-    aspect-ratio: 16/9;
-    height: auto;
-    flex: none;
+    max-width: 100%;
   }
 
   .feedback-area {

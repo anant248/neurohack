@@ -27,8 +27,8 @@ describe("QuestionSelector", () => {
   it("shows selected question in preview box", () => {
     const question = INTERVIEW_QUESTIONS[2]
     render(<QuestionSelector selectedQuestion={question} onSelect={vi.fn()} />)
-    // The text appears in both the <option> and the <p> preview box; target the <p>
-    expect(screen.getByText(question, { selector: "p" })).toBeInTheDocument()
+    // The preview <p> has a ❝ prefix, so match by contained text
+    expect(screen.getByText(new RegExp(question), { selector: "p" })).toBeInTheDocument()
   })
 
   it("does not show preview box when no question is selected", () => {
@@ -39,7 +39,7 @@ describe("QuestionSelector", () => {
   it("calls onSelect with a valid question when Random is clicked", () => {
     const onSelect = vi.fn()
     render(<QuestionSelector selectedQuestion="" onSelect={onSelect} />)
-    const randomBtn = screen.getByText(/Random Question/i)
+    const randomBtn = screen.getByText(/Random/i)
     fireEvent.click(randomBtn)
     expect(onSelect).toHaveBeenCalledTimes(1)
     const called = onSelect.mock.calls[0][0] as string

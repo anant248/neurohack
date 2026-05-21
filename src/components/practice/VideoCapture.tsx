@@ -2,7 +2,6 @@
 
 import { type RefObject, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
-import { Card } from "@/components/ui/Card"
 
 interface VideoCaptureProps {
   videoRef: RefObject<HTMLVideoElement | null>
@@ -25,8 +24,7 @@ export function VideoCapture({
   onStart,
   onStop,
 }: VideoCaptureProps) {
-  // Draw placeholder when not recording; clear to transparent when recording
-  // so the live video underneath shows through.
+  // Placeholder when idle; transparent when recording so the video shows through
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -34,12 +32,10 @@ export function VideoCapture({
     if (!ctx) return
 
     if (isRecording) {
-      // Make canvas transparent — the video element below shows through
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       return
     }
 
-    // Idle state: draw placeholder graphic
     canvas.width = 1280
     canvas.height = 720
 
@@ -64,29 +60,18 @@ export function VideoCapture({
     ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
     ctx.font = "28px Inter, system-ui, sans-serif"
     ctx.textAlign = "center"
-    ctx.fillText("Ready to begin your interview", canvas.width / 2, canvas.height / 2 + 80)
+    ctx.fillText("Ready to begin", canvas.width / 2, canvas.height / 2 + 80)
     ctx.font = "18px Inter, system-ui, sans-serif"
     ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
-    ctx.fillText('Click "Start Recording" when ready', canvas.width / 2, canvas.height / 2 + 120)
+    ctx.fillText("Select a question, then hit Start Recording", canvas.width / 2, canvas.height / 2 + 120)
   }, [isRecording, canvasRef])
 
   const canStart = isReady && hasQuestion && !isRecording && !isAnalyzing
 
   return (
-    <Card>
-      <div className="step-indicator">
-        <span className="step-number">2</span>
-        <h2 className="step-title">Practice Your Response</h2>
-      </div>
-      <p className="step-description">
-        Look into the camera and answer naturally. We&apos;ll analyze your eye contact,
-        facial expressions, and body language in real-time.
-      </p>
-
+    <div className="video-panel">
       <div className="video-wrapper">
-        {/* Video sits below the canvas; stream only flows when recording */}
         <video ref={videoRef} autoPlay muted playsInline />
-        {/* Canvas is always on top: placeholder when idle, transparent when recording */}
         <canvas ref={canvasRef} />
         {isRecording && (
           <div className="recording-indicator">
@@ -96,45 +81,42 @@ export function VideoCapture({
         )}
       </div>
 
-      {!isRecording && !isAnalyzing && (
-        <Button
-          variant="primary"
-          onClick={onStart}
-          disabled={!canStart}
-          type="button"
-        >
-          {!isReady ? (
-            <>
-              <span className="spinner" />
-              Loading AI Model...
-            </>
-          ) : (
-            <>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                <circle cx="12" cy="12" r="3" fill="currentColor" />
-              </svg>
-              Start Recording
-            </>
-          )}
-        </Button>
-      )}
+      <div className="video-controls">
+        {!isRecording && !isAnalyzing && (
+          <Button variant="primary" onClick={onStart} disabled={!canStart} type="button">
+            {!isReady ? (
+              <>
+                <span className="spinner" />
+                Loading model…
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="3" fill="currentColor" />
+                </svg>
+                {hasQuestion ? "Start Recording" : "Select a question first"}
+              </>
+            )}
+          </Button>
+        )}
 
-      {isRecording && (
-        <Button variant="stop" onClick={onStop} type="button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
-          </svg>
-          Stop &amp; Analyze
-        </Button>
-      )}
+        {isRecording && (
+          <Button variant="stop" onClick={onStop} type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
+            </svg>
+            Stop &amp; Analyze
+          </Button>
+        )}
 
-      {isAnalyzing && (
-        <div className="analyzing-state">
-          <div className="analyzing-spinner" />
-          <p className="analyzing-text">Analyzing your performance...</p>
-        </div>
-      )}
-    </Card>
+        {isAnalyzing && (
+          <div className="analyzing-inline">
+            <div className="spinner" style={{ borderTopColor: "#667eea" }} />
+            <span>Analyzing your performance…</span>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

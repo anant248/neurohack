@@ -8,11 +8,6 @@ describe("buildFeedbackPrompt", () => {
     question: "Tell me about yourself.",
   }
 
-  it("includes the interview question in the prompt", () => {
-    const prompt = buildFeedbackPrompt(base)
-    expect(prompt).toContain("Tell me about yourself.")
-  })
-
   it("includes the eye contact score", () => {
     const prompt = buildFeedbackPrompt(base)
     expect(prompt).toContain("75%")
@@ -21,6 +16,11 @@ describe("buildFeedbackPrompt", () => {
   it("includes the expression score", () => {
     const prompt = buildFeedbackPrompt(base)
     expect(prompt).toContain("60%")
+  })
+
+  it("does NOT embed the question text in the prompt (prevents verbal-content inference)", () => {
+    const prompt = buildFeedbackPrompt(base)
+    expect(prompt).not.toContain("Tell me about yourself.")
   })
 
   it("omits progress context when previousScores is not provided", () => {
@@ -60,7 +60,16 @@ describe("buildFeedbackPrompt", () => {
       previousScores: [{ eyeContactScore: 70, expressionScore: 60 }],
     })
     expect(prompt).toContain("-30%")
-    expect(prompt).toContain("-30%")
+  })
+
+  it("instructs to lead with strength when either score >= 60", () => {
+    const prompt = buildFeedbackPrompt({ eyeContactScore: 75, expressionScore: 30, question: "Q" })
+    expect(prompt).toContain("Start with a genuine strength")
+  })
+
+  it("instructs to be encouraging when both scores < 60", () => {
+    const prompt = buildFeedbackPrompt({ eyeContactScore: 40, expressionScore: 30, question: "Q" })
+    expect(prompt).toContain("Be encouraging")
   })
 
   it("returns a non-empty string for any valid input", () => {

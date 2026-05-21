@@ -37,9 +37,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   try {
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY
     if (!apiKey) {
-      console.error("[/api/feedback] GEMINI_API_KEY is not set")
+      console.error("[/api/feedback] GOOGLE_GENERATIVE_AI_API_KEY is not set")
       return Response.json({ error: "AI feedback unavailable" }, { status: 503 })
     }
 

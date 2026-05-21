@@ -125,7 +125,9 @@ export function createFaceLandmarkerSession(): FaceLandmarkerSession {
       landmarkHistory = []
       tracking = true
 
-      webcamStream = await navigator.mediaDevices.getUserMedia({ video: true })
+      webcamStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 16 / 9 } },
+      })
       videoEl.srcObject = webcamStream
 
       await new Promise<void>(resolve => {

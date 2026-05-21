@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# build info
+*.tsbuildinfo
+
+# local env files
+.env*.local
+.env
+
+# macOS
+.DS_Store
+
+# Vercel
+.vercel
+
+# Playwright
+playwright-report/
+test-results/

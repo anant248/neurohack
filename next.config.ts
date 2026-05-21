@@ -1,17 +1,21 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+import type { NextConfig } from "next"
+
+const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/facelandmarker',
+        source: "/",
+        destination: "/practice",
         permanent: false,
       },
-    ];
+      // backward-compat: old route still works
+      {
+        source: "/facelandmarker",
+        destination: "/practice",
+        permanent: true,
+      },
+    ]
   },
-};
+}
 
-module.exports = nextConfig;
+export default nextConfig

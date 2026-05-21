@@ -14,8 +14,8 @@ test.describe("Practice page", () => {
     await page.goto("/practice")
   })
 
-  test("renders the page title", async ({ page }) => {
-    await expect(page.getByText("Let's Ace That Interview.")).toBeVisible()
+  test("renders the app logo / brand name", async ({ page }) => {
+    await expect(page.getByText("Interprep")).toBeVisible()
   })
 
   test("shows question selector with dropdown", async ({ page }) => {
@@ -23,9 +23,9 @@ test.describe("Practice page", () => {
   })
 
   test("Start Recording button is disabled without a question", async ({ page }) => {
+    // Wait for model to finish loading — button text switches from "Loading model…" to "Start Recording"
     const startBtn = page.getByRole("button", { name: /Start Recording/i })
-    // Button may not appear until model loads, so wait for it
-    await expect(startBtn).toBeVisible({ timeout: 15000 })
+    await expect(startBtn).toBeVisible({ timeout: 30000 })
     await expect(startBtn).toBeDisabled()
   })
 
@@ -38,8 +38,8 @@ test.describe("Practice page", () => {
     await expect(startBtn).toBeEnabled({ timeout: 30000 })
   })
 
-  test("Random Question button selects a question", async ({ page }) => {
-    await page.getByRole("button", { name: /Random Question/i }).click()
+  test("Random button selects a question", async ({ page }) => {
+    await page.getByRole("button", { name: /Random/i }).click()
     const select = page.getByRole("combobox")
     const value = await select.inputValue()
     expect(value.length).toBeGreaterThan(0)

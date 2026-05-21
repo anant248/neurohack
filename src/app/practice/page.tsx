@@ -15,7 +15,7 @@ export default function PracticePage() {
   const [selectedQuestion, setSelectedQuestion] = useState("")
   const [showHistory, setShowHistory] = useState(false)
 
-  const { isReady, isRecording, isAnalyzing, results, start, stop, reset } = useFaceLandmarker()
+  const { isReady, isRecording, isAnalyzing, isAiLoading, results, start, stop, reset } = useFaceLandmarker()
   const { history, addSession } = useSessionHistory()
 
   const handleStart = async () => {
@@ -24,7 +24,7 @@ export default function PracticePage() {
   }
 
   const handleStop = async () => {
-    const result = await stop()
+    const result = await stop(selectedQuestion, history)
     if (result) {
       addSession({
         eyeContactScore: result.eyeContactScore,
@@ -78,7 +78,7 @@ export default function PracticePage() {
         onStop={handleStop}
       />
 
-      {results && <ResultsCard results={results} onReset={reset} />}
+      {results && <ResultsCard results={results} isAiLoading={isAiLoading} onReset={reset} />}
     </div>
   )
 }

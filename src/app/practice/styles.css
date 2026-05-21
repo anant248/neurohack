@@ -458,6 +458,35 @@ body {
   font-size: 1rem;
 }
 
+/* ==================== FEEDBACK SKELETON ==================== */
+.feedback-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-line--long  { width: 100%; }
+.skeleton-line--medium { width: 75%; }
+.skeleton-line--short  { width: 50%; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeInDown {
   from {

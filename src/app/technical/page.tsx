@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import type { LeetCodeQuestion } from "@/lib/leetcode"
+import type { CodeReviewResponse } from "@/app/api/code-review/route"
 import "./styles.css"
 
 // CodeMirror is SSR-unfriendly — load client-side only
@@ -33,6 +34,9 @@ export default function TechnicalPage() {
   const [code, setCode] = useState(JS_STARTER)
   const [showWebcam, setShowWebcam] = useState(false)
   const [webcamError, setWebcamError] = useState(false)
+  const [review, setReview] = useState<string | null>(null)
+  const [isReviewing, setIsReviewing] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
@@ -77,6 +81,34 @@ export default function TechnicalPage() {
     if (next === lang) return
     setLang(next)
     setCode(next === "js" ? JS_STARTER : PY_STARTER)
+    setReview(null)
+    setReviewError(null)
+  }
+
+  const handleReview = async () => {
+    if (!question || isReviewing) return
+    setIsReviewing(true)
+    setReview(null)
+    setReviewError(null)
+    try {
+      const res = await fetch("/api/code-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          language: lang,
+          problemTitle: question.title,
+          problemContent: question.content,
+        }),
+      })
+      if (!res.ok) throw new Error(`${res.status}`)
+      const data = (await res.json()) as CodeReviewResponse
+      setReview(data.review)
+    } catch {
+      setReviewError("Couldn't get AI feedback — please try again.")
+    } finally {
+      setIsReviewing(false)
+    }
   }
 
   const extensions = lang === "js" ? jsExt : pyExt
@@ -149,7 +181,7 @@ export default function TechnicalPage() {
           </div>
         </aside>
 
-        {/* ── Right: editor ── */}
+        {/* ── Right: editor + feedback ── */}
         <section className="editor-panel">
           <div className="editor-toolbar">
             <button
@@ -186,7 +218,14 @@ export default function TechnicalPage() {
               height="100%"
               theme="dark"
               extensions={extensions as never[]}
-              onChange={setCode}
+              onChange={(val) => {
+                setCode(val)
+                // Clear stale review when code changes
+                if (review) {
+                  setReview(null)
+                  setReviewError(null)
+                }
+              }}
             />
           </div>
 
@@ -197,6 +236,48 @@ export default function TechnicalPage() {
                 <div className="webcam-error">Camera unavailable</div>
               ) : (
                 <video ref={videoRef} autoPlay playsInline muted />
+              )}
+            </div>
+          )}
+
+          {/* AI Feedback button */}
+          <button
+            className={`review-btn${isReviewing ? " reviewing" : ""}`}
+            onClick={handleReview}
+            disabled={isReviewing || !question}
+            data-testid="review-btn"
+          >
+            {isReviewing ? (
+              <>
+                <span className="spinner" />
+                Reviewing…
+              </>
+            ) : (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A8 8 0 0 1 4 9a1 1 0 0 1 2 0 6 6 0 0 0 6 6 1 1 0 0 1 1 1zM13 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" fill="currentColor"/>
+                </svg>
+                Get AI Feedback
+              </>
+            )}
+          </button>
+
+          {/* Review panel */}
+          {(review || reviewError) && (
+            <div className={`review-panel${review ? "" : " review-panel--error"}`} data-testid="review-panel">
+              {reviewError ? (
+                <p className="review-error-text">{reviewError}</p>
+              ) : (
+                <>
+                  <div className="review-panel-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 11l3 3L22 4" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    AI Code Review
+                  </div>
+                  <div className="review-text">{review}</div>
+                </>
               )}
             </div>
           )}

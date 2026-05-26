@@ -4,14 +4,13 @@ import { runInNewContext } from "vm"
 import {
   parseTestCases,
   buildJSHarness,
-  buildPyHarness,
   getFuncName,
   type TestResult,
 } from "@/lib/codeRunner"
 
 const RequestSchema = z.object({
   code: z.string().min(1).max(10000),
-  language: z.enum(["js", "py"]),
+  language: z.literal("js"),
   exampleTestcases: z.string(),
   metaData: z.string(),
   content: z.string(),
@@ -22,8 +21,6 @@ export type RunCodeRequest = z.infer<typeof RequestSchema>
 export interface RunCodeResponse {
   results: TestResult[]
 }
-
-const PISTON_URL = "https://emkc.org/api/v2/piston/execute"
 
 // ── JavaScript execution via Node.js vm (no external service) ───────────────
 
@@ -60,33 +57,6 @@ function executeJS(harness: string): { stdout: string; stderr: string } {
   }
 }
 
-// ── Python execution via Piston API ─────────────────────────────────────────
-
-async function executePython(
-  harness: string,
-): Promise<{ stdout: string; stderr: string } | null> {
-  try {
-    const res = await fetch(PISTON_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "interprep/1.0",
-      },
-      body: JSON.stringify({
-        language: "python",
-        version: "*",
-        files: [{ content: harness }],
-      }),
-      signal: AbortSignal.timeout(12000),
-    })
-    if (!res.ok) return null
-    const data = (await res.json()) as { run: { stdout: string; stderr: string } }
-    return { stdout: data.run.stdout ?? "", stderr: data.run.stderr ?? "" }
-  } catch {
-    return null
-  }
-}
-
 // ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest): Promise<Response> {
@@ -102,7 +72,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     return Response.json({ error: parsed.error.format() }, { status: 400 })
   }
 
-  const { code, language, exampleTestcases, metaData, content } = parsed.data
+  const { code, exampleTestcases, metaData, content } = parsed.data
 
   const testCases = parseTestCases(exampleTestcases, metaData, content)
   if (testCases.length === 0) {
@@ -113,30 +83,8 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const funcName = getFuncName(metaData)
-
-  let stdout: string
-  let stderr: string
-
-  if (language === "js") {
-    const harness = buildJSHarness(code, funcName, testCases)
-    const result = executeJS(harness)
-    stdout = result.stdout
-    stderr = result.stderr
-  } else {
-    const harness = buildPyHarness(code, funcName, testCases)
-    const result = await executePython(harness)
-    if (result === null) {
-      return Response.json(
-        {
-          error:
-            "Python execution service is unavailable. Try switching to JavaScript, or test your Python solution locally with `python solution.py`.",
-        },
-        { status: 503 },
-      )
-    }
-    stdout = result.stdout
-    stderr = result.stderr
-  }
+  const harness = buildJSHarness(code, funcName, testCases)
+  const { stdout, stderr } = executeJS(harness)
 
   if (!stdout.trim()) {
     const errMsg = stderr?.trim() || "Execution produced no output."

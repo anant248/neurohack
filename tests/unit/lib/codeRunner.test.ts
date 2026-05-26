@@ -4,6 +4,7 @@ import {
   parseTestCases,
   buildJSHarness,
   buildPyHarness,
+  buildPyHarnessClient,
   getFuncName,
 } from "@/lib/codeRunner"
 
@@ -99,6 +100,20 @@ describe("buildPyHarness", () => {
   it("calls the correct function name", () => {
     const harness = buildPyHarness("", "twoSum", [{ inputs: [[1, 2], 3], expected: [0, 1] }])
     expect(harness).toContain("twoSum(*tc[\"inputs\"])")
+  })
+})
+
+describe("buildPyHarnessClient", () => {
+  it("embeds the user code", () => {
+    const harness = buildPyHarnessClient("def twoSum(a,b): pass", "twoSum", [])
+    expect(harness).toContain("def twoSum(a,b): pass")
+  })
+
+  it("ends with bare expression (no print) so Pyodide can capture the return value", () => {
+    const harness = buildPyHarnessClient("", "twoSum", [{ inputs: [[1, 2], 3], expected: [0, 1] }])
+    const trimmed = harness.trimEnd()
+    expect(trimmed.endsWith("__json.dumps(__results)")).toBe(true)
+    expect(trimmed).not.toMatch(/print\s*\(/)
   })
 })
 

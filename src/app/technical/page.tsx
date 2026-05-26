@@ -8,9 +8,10 @@ import { Prec } from "@codemirror/state"
 import { acceptCompletion, closeCompletion, completionStatus } from "@codemirror/autocomplete"
 import type { EditorView } from "@codemirror/view"
 import type { LeetCodeQuestion } from "@/lib/leetcode"
-import { generateStarterCode } from "@/lib/codeRunner"
+import { generateStarterCode, buildPyHarnessClient, parseTestCases, getFuncName } from "@/lib/codeRunner"
 import type { RunCodeResponse } from "@/app/api/run-code/route"
 import type { CodeReviewResponse } from "@/app/api/code-review/route"
+import type { TestResult } from "@/lib/codeRunner"
 import "./styles.css"
 
 // CodeMirror is SSR-unfriendly — load client-side only
@@ -53,6 +54,47 @@ function saveCode(lang: "js" | "py", code: string) {
   }
 }
 
+// ── Pyodide singleton ─────────────────────────────────────────────────────────
+// Module-level cache so the runtime is only loaded once per page session.
+
+type PyodideInterface = {
+  runPythonAsync: (code: string) => Promise<unknown>
+}
+
+declare global {
+  interface Window {
+    loadPyodide: (opts?: { indexURL?: string }) => Promise<PyodideInterface>
+  }
+}
+
+let pyodideInstance: PyodideInterface | null = null
+let pyodideLoading: Promise<PyodideInterface> | null = null
+
+async function getPyodide(): Promise<PyodideInterface> {
+  if (pyodideInstance) return pyodideInstance
+  if (pyodideLoading) return pyodideLoading
+
+  pyodideLoading = (async () => {
+    await new Promise<void>((resolve, reject) => {
+      if (typeof window.loadPyodide === "function") { resolve(); return }
+      const script = document.createElement("script")
+      script.src = "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js"
+      script.onload = () => resolve()
+      script.onerror = () => reject(new Error("Failed to load Pyodide script"))
+      document.head.appendChild(script)
+    })
+    const instance = await window.loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/",
+    })
+    pyodideInstance = instance
+    return instance
+  })()
+
+  return pyodideLoading
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function TechnicalPage() {
   const [question, setQuestion] = useState<LeetCodeQuestion | null>(null)
   const [loading, setLoading] = useState(true)
@@ -60,9 +102,11 @@ export default function TechnicalPage() {
   const [lang, setLang] = useState<"js" | "py">("js")
   const [code, setCode] = useState("")
 
-  const [testResults, setTestResults] = useState<RunCodeResponse["results"] | null>(null)
+  const [testResults, setTestResults] = useState<TestResult[] | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
+
+  const [pyodideStatus, setPyodideStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
 
   const [review, setReview] = useState<string | null>(null)
   const [isReviewing, setIsReviewing] = useState(false)
@@ -142,23 +186,68 @@ export default function TechnicalPage() {
     setIsRunning(true)
     setTestResults(null)
     setRunError(null)
+
     try {
-      const res = await fetch("/api/run-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          language: lang,
-          exampleTestcases: question.exampleTestcases,
-          metaData: question.metaData,
-          content: question.content,
-        }),
-      })
-      const data = await res.json() as RunCodeResponse & { error?: string }
-      if (!res.ok || data.error) {
-        setRunError(data.error ?? "Execution failed.")
+      if (lang === "js") {
+        // JavaScript: server-side via Node.js vm
+        const res = await fetch("/api/run-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            language: "js",
+            exampleTestcases: question.exampleTestcases,
+            metaData: question.metaData,
+            content: question.content,
+          }),
+        })
+        const data = (await res.json()) as RunCodeResponse & { error?: string }
+        if (!res.ok || data.error) {
+          setRunError(data.error ?? "Execution failed.")
+        } else {
+          setTestResults(data.results)
+        }
       } else {
-        setTestResults(data.results)
+        // Python: client-side via Pyodide (WebAssembly)
+        if (pyodideStatus === "idle" || pyodideStatus === "error") {
+          setPyodideStatus("loading")
+        }
+        let pyodide: PyodideInterface
+        try {
+          pyodide = await getPyodide()
+          setPyodideStatus("ready")
+        } catch {
+          setPyodideStatus("error")
+          setRunError("Could not load the Python runtime. Check your connection and try again.")
+          return
+        }
+
+        const testCases = parseTestCases(question.exampleTestcases, question.metaData, question.content)
+        if (testCases.length === 0) {
+          setRunError("Could not parse test cases for this problem.")
+          return
+        }
+
+        const funcName = getFuncName(question.metaData)
+        const harness = buildPyHarnessClient(code, funcName, testCases)
+
+        try {
+          const resultJson = await pyodide.runPythonAsync(harness) as string
+          const results = JSON.parse(resultJson) as TestResult[]
+          setTestResults(results)
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e)
+          // Surface Python errors as fail results (one per test case)
+          const errorLine = msg.split("\n").find((l) => l.trim().length > 0) ?? "Runtime error"
+          setTestResults(
+            testCases.map((tc) => ({
+              pass: false,
+              actual: errorLine,
+              expected: JSON.stringify(tc.expected),
+              error: msg,
+            })),
+          )
+        }
       }
     } catch {
       setRunError("Could not reach the execution service. Try again.")
@@ -195,6 +284,12 @@ export default function TechnicalPage() {
 
   const extensions = [autocompleteKeymap, ...((lang === "js" ? jsExt : pyExt) as never[])]
   const allPassed = testResults?.every((r) => r.pass) ?? false
+
+  const runBtnLabel = isRunning
+    ? lang === "py" && pyodideStatus === "loading"
+      ? "Loading Python…"
+      : "Running…"
+    : "Run Test Cases"
 
   return (
     <div className="technical-layout">
@@ -315,7 +410,7 @@ export default function TechnicalPage() {
               data-testid="run-btn"
             >
               {isRunning ? (
-                <><span className="spinner" />Running…</>
+                <><span className="spinner" />{runBtnLabel}</>
               ) : (
                 <>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

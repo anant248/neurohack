@@ -90,3 +90,38 @@ no obvious error in logs.
 example, the API route that consumes it, and the Vercel/deployment setup guide.
 Use a fallback chain when names are ambiguous:
 `process.env.PREFERRED_NAME ?? process.env.LEGACY_NAME`.
+
+---
+
+## L-008 — CodeMirror custom keymaps must use `Prec.highest()` to override basicSetup
+
+**What happened**: A custom keymap binding Tab to `acceptCompletion` was added
+via the `extensions` array but appended after `basicSetup`. Because CodeMirror
+resolves keymaps in order, `basicSetup`'s Tab→indent binding fired first and the
+custom binding was never reached — Tab kept indenting instead of accepting
+autocomplete suggestions.
+
+**Rule**: Any custom keymap that must override a binding already provided by
+`basicSetup` (Tab, Enter, Escape, etc.) must be wrapped in `Prec.highest()`:
+```typescript
+const myKeymap = Prec.highest(keymap.of([{ key: "Tab", run: acceptCompletion }]))
+```
+`acceptCompletion` returns `false` when no completion popup is open, so it
+safely falls through to the default handler in that case — no need to guard it.
+
+---
+
+## L-009 — Piston public API is blocked by Vercel serverless IPs; use vm for JS and Pyodide for Python
+
+**What happened**: Run Test Cases returned 503 in production. The Piston API
+(`emkc.org/api/v2/piston/execute`) blocks requests from Vercel's serverless
+egress IPs, so Python execution always failed on deploy even though it worked
+locally.
+
+**Rule**: Never rely on Piston (or similar shared execution sandboxes) from a
+Vercel API route.
+- **JavaScript**: use Node.js `vm.runInNewContext` in the API route — no external
+  service, no network, deterministic.
+- **Python**: use Pyodide (WebAssembly) loaded client-side from the CDN. The
+  harness result must be the last expression (not `print(...)`) so
+  `pyodide.runPythonAsync()` can capture the return value directly.

@@ -213,6 +213,33 @@ print(__json.dumps(__results))
 `
 }
 
+// Pyodide variant: last line is a bare expression so runPythonAsync() captures the value.
+// print() returns None in Python, so we can't use it here.
+export function buildPyHarnessClient(
+  code: string,
+  funcName: string,
+  testCases: TestCase[],
+): string {
+  const casesJson = JSON.stringify(testCases).replace(/\\/g, "\\\\").replace(/'/g, "\\'")
+  return `import json as __json
+
+${code}
+
+# ── auto-injected test harness ──
+__cases = __json.loads('${casesJson}')
+__results = []
+for tc in __cases:
+    try:
+        __actual = ${funcName}(*tc["inputs"])
+        __expected = tc["expected"]
+        __pass = __actual == __expected
+        __results.append({"pass": __pass, "actual": str(__actual), "expected": str(__expected)})
+    except Exception as e:
+        __results.append({"pass": False, "actual": f"Error: {e}", "expected": str(tc["expected"])})
+__json.dumps(__results)
+`
+}
+
 export function getFuncName(metaDataStr: string): string {
   try {
     const meta = JSON.parse(metaDataStr) as MetaData

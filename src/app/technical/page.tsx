@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { keymap } from "@codemirror/view"
+import { Prec } from "@codemirror/state"
 import { acceptCompletion, closeCompletion, completionStatus } from "@codemirror/autocomplete"
 import type { EditorView } from "@codemirror/view"
 import type { LeetCodeQuestion } from "@/lib/leetcode"
@@ -15,20 +16,24 @@ import "./styles.css"
 // CodeMirror is SSR-unfriendly — load client-side only
 const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), { ssr: false })
 
-// Tab accepts autocomplete; Enter closes completion and falls through to newline
-const autocompleteKeymap = keymap.of([
-  { key: "Tab", run: acceptCompletion },
-  {
-    key: "Enter",
-    run: (view: EditorView) => {
-      if (completionStatus(view.state)) {
-        closeCompletion(view)
-        return false // fall through → default newline+indent handler runs
-      }
-      return false
+// Prec.highest ensures this keymap fires before basicSetup's Tab→indent binding.
+// acceptCompletion returns false when no completion is open, so Tab falls
+// through to normal indentation in that case.
+const autocompleteKeymap = Prec.highest(
+  keymap.of([
+    { key: "Tab", run: acceptCompletion },
+    {
+      key: "Enter",
+      run: (view: EditorView) => {
+        if (completionStatus(view.state)) {
+          closeCompletion(view)
+          return false // fall through → default newline+indent handler runs
+        }
+        return false
+      },
     },
-  },
-])
+  ]),
+)
 
 const SESSION_KEY = (lang: "js" | "py") => `interprep-tech-code-${lang}`
 

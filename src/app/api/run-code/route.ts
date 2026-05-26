@@ -1,5 +1,6 @@
 import { type NextRequest } from "next/server"
 import { z } from "zod"
+import { runInNewContext } from "vm"
 import {
   parseTestCases,
   buildJSHarness,
@@ -13,7 +14,7 @@ const RequestSchema = z.object({
   language: z.enum(["js", "py"]),
   exampleTestcases: z.string(),
   metaData: z.string(),
-  content: z.string(), // LeetCode question HTML — used to extract expected outputs
+  content: z.string(),
 })
 
 export type RunCodeRequest = z.infer<typeof RequestSchema>
@@ -23,6 +24,70 @@ export interface RunCodeResponse {
 }
 
 const PISTON_URL = "https://emkc.org/api/v2/piston/execute"
+
+// ── JavaScript execution via Node.js vm (no external service) ───────────────
+
+function executeJS(harness: string): { stdout: string; stderr: string } {
+  const logs: string[] = []
+  const ctx = {
+    console: {
+      log: (...args: unknown[]) =>
+        logs.push(args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ")),
+      error: (...args: unknown[]) =>
+        logs.push(args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ")),
+    },
+    JSON,
+    Math,
+    Array,
+    Object,
+    String,
+    Number,
+    Boolean,
+    Set,
+    Map,
+    parseInt,
+    parseFloat,
+    isNaN,
+    isFinite,
+    undefined,
+  }
+  try {
+    runInNewContext(harness, ctx, { timeout: 5000 })
+    return { stdout: logs.join("\n"), stderr: "" }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    return { stdout: "", stderr: msg }
+  }
+}
+
+// ── Python execution via Piston API ─────────────────────────────────────────
+
+async function executePython(
+  harness: string,
+): Promise<{ stdout: string; stderr: string } | null> {
+  try {
+    const res = await fetch(PISTON_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "interprep/1.0",
+      },
+      body: JSON.stringify({
+        language: "python",
+        version: "*",
+        files: [{ content: harness }],
+      }),
+      signal: AbortSignal.timeout(12000),
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as { run: { stdout: string; stderr: string } }
+    return { stdout: data.run.stdout ?? "", stderr: data.run.stderr ?? "" }
+  } catch {
+    return null
+  }
+}
+
+// ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest): Promise<Response> {
   let body: unknown
@@ -48,68 +113,49 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const funcName = getFuncName(metaData)
-  const harness =
-    language === "js"
-      ? buildJSHarness(code, funcName, testCases)
-      : buildPyHarness(code, funcName, testCases)
 
-  try {
-    const pistonRes = await fetch(PISTON_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        language: language === "js" ? "javascript" : "python",
-        version: "*",
-        files: [{ content: harness }],
-      }),
-      signal: AbortSignal.timeout(12000),
-    })
+  let stdout: string
+  let stderr: string
 
-    if (!pistonRes.ok) {
-      throw new Error(`Piston API error: ${pistonRes.status}`)
-    }
-
-    const pistonData = (await pistonRes.json()) as {
-      run: { stdout: string; stderr: string; code: number }
-    }
-
-    const { stdout, stderr } = pistonData.run
-
-    if (!stdout.trim()) {
-      // Runtime error or compilation failure
-      const errMsg = stderr?.trim() || "Execution produced no output."
-      return Response.json({
-        results: testCases.map((tc) => ({
-          pass: false,
-          actual: errMsg.split("\n")[0] ?? "Runtime error",
-          expected: JSON.stringify(tc.expected),
-          error: errMsg,
-        })),
-      } satisfies RunCodeResponse)
-    }
-
-    let results: TestResult[]
-    try {
-      results = JSON.parse(stdout.trim()) as TestResult[]
-    } catch {
+  if (language === "js") {
+    const harness = buildJSHarness(code, funcName, testCases)
+    const result = executeJS(harness)
+    stdout = result.stdout
+    stderr = result.stderr
+  } else {
+    const harness = buildPyHarness(code, funcName, testCases)
+    const result = await executePython(harness)
+    if (result === null) {
       return Response.json(
-        { error: "Could not parse execution output." },
-        { status: 500 },
+        {
+          error:
+            "Python execution service is unavailable. Try switching to JavaScript, or test your Python solution locally with `python solution.py`.",
+        },
+        { status: 503 },
       )
     }
-
-    return Response.json({ results } satisfies RunCodeResponse)
-  } catch (error) {
-    console.error("[/api/run-code]", error)
-    const isTimeout =
-      error instanceof Error && error.name === "TimeoutError"
-    return Response.json(
-      {
-        error: isTimeout
-          ? "Execution timed out (10 s). Check for infinite loops."
-          : "Failed to reach the code execution service.",
-      },
-      { status: 503 },
-    )
+    stdout = result.stdout
+    stderr = result.stderr
   }
+
+  if (!stdout.trim()) {
+    const errMsg = stderr?.trim() || "Execution produced no output."
+    return Response.json({
+      results: testCases.map((tc) => ({
+        pass: false,
+        actual: errMsg.split("\n")[0] ?? "Runtime error",
+        expected: JSON.stringify(tc.expected),
+        error: errMsg,
+      })),
+    } satisfies RunCodeResponse)
+  }
+
+  let results: TestResult[]
+  try {
+    results = JSON.parse(stdout.trim()) as TestResult[]
+  } catch {
+    return Response.json({ error: "Could not parse execution output." }, { status: 500 })
+  }
+
+  return Response.json({ results } satisfies RunCodeResponse)
 }

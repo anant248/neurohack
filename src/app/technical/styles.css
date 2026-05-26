@@ -156,6 +156,27 @@ body {
   margin-left: auto;
 }
 
+/* LeetCode external link */
+.leetcode-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(255, 161, 22, 0.12);
+  border: 1px solid rgba(255, 161, 22, 0.25);
+  border-radius: 8px;
+  color: #fbbf24;
+  font-size: 0.73rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.leetcode-link:hover {
+  background: rgba(255, 161, 22, 0.22);
+  border-color: rgba(255, 161, 22, 0.45);
+}
+
 .question-title {
   font-size: 1.1rem;
   font-weight: 700;
@@ -319,34 +340,6 @@ body {
   color: white;
 }
 
-.webcam-toggle-btn {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.webcam-toggle-btn.active {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #6ee7b7;
-}
-
-.webcam-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
 /* CodeMirror wrapper */
 .editor-wrapper {
   flex: 1;
@@ -356,7 +349,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Override CodeMirror defaults to fill container */
 .editor-wrapper .cm-editor {
   height: 100%;
   font-size: 0.9rem;
@@ -366,52 +358,45 @@ body {
   font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 }
 
-/* Webcam strip */
-.webcam-strip {
-  flex-shrink: 0;
-  height: 120px;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.webcam-strip video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1); /* mirror */
-}
-
-.webcam-error {
-  position: absolute;
-  inset: 0;
+/* ==================== ACTION ROW ==================== */
+.action-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.45);
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-/* ==================== AI FEEDBACK BUTTON ==================== */
+.run-btn,
 .review-btn {
-  flex-shrink: 0;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 11px 18px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 11px 16px;
   border: none;
   border-radius: 12px;
-  color: white;
   font-size: 0.88rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+}
+
+.run-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.run-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.review-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
 }
 
 .review-btn:hover:not(:disabled) {
@@ -419,16 +404,19 @@ body {
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
+.run-btn:disabled,
 .review-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
+.run-btn.running,
 .review-btn.reviewing {
   opacity: 0.8;
   cursor: wait;
 }
 
+/* Spinner */
 .spinner {
   width: 14px;
   height: 14px;
@@ -439,11 +427,129 @@ body {
   flex-shrink: 0;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ==================== TEST RESULTS PANEL ==================== */
+.test-results-panel {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeInUp 0.3s ease-out;
 }
 
-/* ==================== REVIEW PANEL ==================== */
+.test-results-panel.panel--all-pass {
+  background: rgba(16, 185, 129, 0.07);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.test-results-panel.panel--error {
+  background: rgba(239, 68, 68, 0.07);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.test-results-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.panel--all-pass .test-results-header { color: #34d399; }
+
+.panel-error-text {
+  font-size: 0.85rem;
+  color: #f87171;
+  font-family: 'Fira Code', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.test-cases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.test-case {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.test-case--pass { border-color: rgba(16, 185, 129, 0.2); }
+.test-case--fail { border-color: rgba(239, 68, 68, 0.2); }
+
+.test-case-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.test-badge {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.test-badge.pass {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.test-badge.fail {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.test-case-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.test-case-detail {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.test-case-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.test-case-key {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 58px;
+}
+
+.test-case-val {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  word-break: break-all;
+}
+
+.test-val--fail { color: #f87171; }
+
+/* ==================== AI REVIEW PANEL ==================== */
 .review-panel {
   flex-shrink: 0;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.07) 0%, rgba(5, 150, 105, 0.07) 100%);
@@ -493,33 +599,30 @@ body {
   color: #f87171;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 /* ==================== ANIMATIONS ==================== */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
   body { overflow: auto; }
-
   .technical-layout { height: auto; }
-
   .technical-main {
     grid-template-columns: 1fr;
     overflow: visible;
     height: auto;
   }
-
-  .editor-panel { display: none; } /* hide editor on small screens */
-
-  .question-panel {
-    overflow: visible;
-    padding-right: 0;
-  }
+  .editor-panel { display: none; }
+  .question-panel { overflow: visible; padding-right: 0; }
 }

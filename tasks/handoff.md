@@ -1,18 +1,23 @@
 # Session Handoff — Interprep Revamp
 
 **Branch**: `claude/stupefied-swartz-cf9ca6`
-**Last commit**: Phase 3 — Interview Mode Selection
-**CI status**: ✅ type-check clean, 47/47 unit tests passing, lint clean
+**Last commit**: `a12ce81` — feat(python): replace Piston with client-side Pyodide (WebAssembly)
+**CI status**: ✅ type-check clean, 82/82 unit tests passing, lint clean
 
 ---
 
-## Goal
+## Goals
 
 Evolve a hackathon face-tracking interview-prep app into a full platform.
 Full 8-phase plan lives in `.claude/plans/this-is-an-app-playful-parasol.md`.
 
-Phase 3 (Interview Mode Selection) is now **complete**.
-The immediate next target is **Phase 4** (see below).
+**Phases 1–4 are complete.** The active surface is `/technical`.
+
+Longer-term targets not yet started:
+- Phase 5: Behavioral page overhaul (structured STAR-method prompts, timer)
+- Phase 6: User dashboard (session history, streaks)
+- Phase 7: Problem picker (search / filter LeetCode problems beyond daily)
+- Phase 8: Polish pass (animations, mobile layout, onboarding)
 
 ---
 
@@ -22,95 +27,120 @@ The immediate next target is **Phase 4** (see below).
 | Route | Status |
 |-------|--------|
 | `/` | ✅ Landing page — two mode cards (Behavioral + Technical) |
-| `/practice` | ✅ Full — face tracking + AI feedback + history modal |
-| `/technical` | ✅ LeetCode daily question + CodeMirror editor + optional webcam |
+| `/practice` | ✅ Face tracking + AI feedback + history modal |
+| `/technical` | ✅ Daily question + editor + Run Test Cases + AI review |
 | `/facelandmarker` | ✅ 301 → `/practice` (backward compat) |
 | `/auth` | ✅ Google + GitHub OAuth sign-in |
 | `/auth/callback` | ✅ OAuth code exchange |
-| `/api/feedback` | ✅ Gemini AI coaching |
+| `/api/feedback` | ✅ Gemini AI coaching (behavioral) |
 | `/api/sessions` | ✅ GET + POST session history (Supabase-gated) |
 | `/api/leetcode` | ✅ Server proxy for LeetCode GraphQL (1-hour ISR cache) |
+| `/api/run-code` | ✅ JS-only execution via Node.js vm |
+| `/api/code-review` | ✅ Gemini code review (correctness / complexity / style) |
 
-### Key files added in Phase 3
+### Key files (active work lives here)
+
 ```
-src/app/page.tsx                  — Landing page (two mode cards)
-src/app/page.css                  — Landing page styles
-src/app/technical/page.tsx        — Technical interview page (client component)
-src/app/technical/styles.css      — Technical page styles
-src/app/api/leetcode/route.ts     — GET proxy → LeetCode GraphQL, s-maxage=3600
+src/app/technical/page.tsx        — Main technical interview page
+src/app/technical/styles.css      — Styles for /technical
+src/app/api/run-code/route.ts     — JS code execution (vm.runInNewContext)
+src/app/api/code-review/route.ts  — Gemini code review endpoint
+src/lib/codeRunner.ts             — parseTestCases, buildJSHarness,
+                                    buildPyHarnessClient, generateStarterCode
 src/lib/leetcode.ts               — fetchDailyQuestion() + 3 fallback questions
-tests/unit/lib/leetcode.test.ts   — 4 unit tests (happy path + 3 fallback triggers)
-tests/unit/api/leetcode.test.ts   — 2 unit tests (status 200 + Cache-Control)
-tests/e2e/landing.spec.ts         — 7 E2E tests for landing + 5 for /technical
+src/lib/codeReviewPrompt.ts       — buildCodeReviewPrompt()
 ```
 
-### Design tokens (both new pages match practice page)
-- Background: `linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)`
-- Font: Inter
-- Glass cards: `rgba(255,255,255,0.05)` + `backdrop-filter: blur(12px)` + `border: 1px solid rgba(255,255,255,0.1)`
-- Primary accent: `#667eea` / `#764ba2`
-- Technical accent: `#10b981` / `#059669`
+### How /technical works end-to-end
 
-### Dependencies added in Phase 3
-```
-@uiw/react-codemirror
-@codemirror/lang-javascript
-@codemirror/lang-python
-```
+1. **On mount**: fetches `/api/leetcode` → LeetCode daily question with
+   `title`, `titleSlug`, `difficulty`, `content` (HTML), `metaData` (JSON),
+   `exampleTestcases` (newline-separated inputs), `topicTags`.
+2. **Editor**: CodeMirror 6 with JS or Python syntax highlighting. Code is
+   persisted per-language in `sessionStorage` (`interprep-tech-code-js` /
+   `interprep-tech-code-py`). The editor opens with the method signature
+   generated from `metaData` via `generateStarterCode()`.
+3. **Run Test Cases (JS)**: POSTs `{ code, language: "js", exampleTestcases,
+   metaData, content }` to `/api/run-code`. The route uses
+   `vm.runInNewContext` with a 5-second timeout; no external service.
+4. **Run Test Cases (Python)**: Loads Pyodide (~10 MB) from CDN
+   (`cdn.jsdelivr.net/pyodide/v0.27.0/full/`) on first use, cached at module
+   level. Calls `pyodide.runPythonAsync(harness)` where the harness ends with
+   a bare `__json.dumps(__results)` expression so Pyodide captures the value.
+   Zero server round-trips for Python execution.
+5. **Get AI Feedback**: POSTs `{ code, language, problemTitle, problemContent }`
+   to `/api/code-review` → Gemini returns structured review (≤200 words).
 
-### Env vars required (unchanged from Phase 2)
+### Env vars required (all set in Vercel)
 ```
-GOOGLE_GENERATIVE_AI_API_KEY      # Gemini — already set in Vercel
+GOOGLE_GENERATIVE_AI_API_KEY      # Gemini — powers /api/feedback + /api/code-review
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 NEXT_PUBLIC_FEATURE_PERSISTENCE   # "true" to activate Phase 2 Supabase features
 ```
 
+### Design tokens (consistent across all pages)
+- Background: `linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)`
+- Font: Inter
+- Glass cards: `rgba(255,255,255,0.05)` + `backdrop-filter: blur(12px)`
+- Primary accent: `#667eea` / `#764ba2`
+- Technical accent: `#10b981` / `#059669`
+
 ---
 
 ## Files Actively Being Edited
 
-None — Phase 3 committed cleanly. Phase 4 not started.
+None — all Pyodide work committed cleanly. No in-progress changes.
 
 ---
 
 ## Everything Tried That Failed
 
-*(Entries from Phase 1–2 preserved below for reference)*
-
 | Attempt | What went wrong | Fix applied |
 |---------|-----------------|-------------|
-| `database.types.ts` without `Relationships: []` | `@supabase/postgrest-js` `GenericTable` requires `Relationships` field | Added `Relationships: []` to both table types |
-| `// eslint-disable-next-line @next/next/no-img-element` in `AuthButton.tsx` | ESLint config doesn't include Next.js plugin — disable comment is itself an error | Removed the comment entirely |
-| AI prompt included the question text | Gemini inferred verbal content | Removed `question` from `buildFeedbackPrompt()` |
-| `#webcam` CSS selector | `<video>` had no `id="webcam"` | Changed to `.video-wrapper video` selector |
-| `GEMINI_API_KEY` env var name | Vercel had `GOOGLE_GENERATIVE_AI_API_KEY` | Added fallback chain |
-| Open redirect in `/auth/callback` | `?next=//evil.com` → cross-origin redirect | Sanitised: only accept paths starting `/` not `//` |
-| `?error=oauth_failed` silently ignored | `AuthForm` never read URL params | Added `useEffect` in `AuthForm` |
+| `database.types.ts` without `Relationships: []` | `@supabase/postgrest-js` requires the field; every `.from()` call returned `never[]` | Added `Relationships: []` to all table types |
+| `// eslint-disable-next-line @next/next/no-img-element` | ESLint config doesn't include Next.js plugin — disabling an unknown rule is itself an error | Removed the comment |
+| AI prompt included the LeetCode question text | Gemini inferred verbal content from a question it shouldn't have seen | Removed `question` from `buildFeedbackPrompt()` |
+| `#webcam` CSS selector | `<video>` element had no `id="webcam"` attribute | Changed selector to `.video-wrapper video` |
+| `GEMINI_API_KEY` env var name | Vercel had `GOOGLE_GENERATIVE_AI_API_KEY`; route silently returned 503 | Added fallback chain: `process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY` |
+| Open redirect in `/auth/callback` via `?next` param | `?next=//evil.com` composed to a cross-origin redirect | Sanitised: only accept values starting `/` and not `//` |
+| `?error=oauth_failed` silently ignored | `AuthForm` never read URL search params | Added `useEffect` that reads `window.location.search` on mount |
+| `vi.stubEnv` leak between tests in `code-review.test.ts` | One test stubbed the API key to empty; the stub leaked into the next test, flipping its expected status code | Added `afterEach(() => vi.unstubAllEnvs())` and `vi.unstubAllEnvs()` in `beforeEach` |
+| CodeMirror Tab binding didn't fire | Custom `keymap.of([{ key: "Tab", run: acceptCompletion }])` was appended after `basicSetup` in the extensions array; `basicSetup`'s Tab→indent fired first | Wrapped with `Prec.highest()` so the custom binding wins priority |
+| Python test runner via Piston API | `emkc.org/api/v2/piston/execute` blocks Vercel serverless egress IPs; all Python runs returned 503 in production | Replaced with client-side Pyodide (WebAssembly); no server round-trip for Python |
+| Piston harness used `print(__json.dumps(__results))` | `pyodide.runPythonAsync()` captures the last expression value, not stdout; `print()` returns `None` | `buildPyHarnessClient()` ends with bare `__json.dumps(__results)` expression |
 
 ---
 
-## Next Step: Phase 4
+## Next Step
 
-Phase 4 per the plan: **AI Code Review on `/technical`**.
+Start **Phase 5: Behavioral page overhaul**.
 
-After the user writes code in the editor, add a "Get AI Feedback" button that sends
-their code + the LeetCode problem statement to Gemini and shows structured feedback:
-- Correctness (does the approach work?)
-- Time/space complexity
-- Style suggestions
+The current `/practice` page exists but was built during the hackathon and is
+rough. The goals:
 
-**New files:**
-1. `src/app/api/code-review/route.ts` — Gemini endpoint. Input: `{ code, language, problemTitle, problemContent }`. Output: `{ review: string }`. Zod-validated like `/api/feedback`.
-2. `src/lib/codeReviewPrompt.ts` — `buildCodeReviewPrompt()`.
-3. Updates to `src/app/technical/page.tsx` — "Get AI Feedback" button below editor, loading/result state.
+1. **STAR-method prompt system** — show a structured prompt (Situation, Task,
+   Action, Result) rather than a free-form question. Fetch or hardcode a bank
+   of behavioural questions.
+2. **Interview timer** — visible countdown (e.g. 2 minutes per answer) with a
+   soft warning at 30 seconds.
+3. **Remove webcam dependency for users who decline** — face tracking is
+   interesting but optional; the page should be fully usable without camera
+   permission. Degrade gracefully.
+4. **Cleaner feedback display** — the Gemini response currently renders as
+   plain text; add the same structured sections (Situation / Task / Action /
+   Result quality, filler-word count, pacing) that the `/technical` AI review
+   uses.
 
-**Tests:**
-- Unit: `codeReviewPrompt.ts`
-- Unit: `POST /api/code-review`
-- E2E: stub the route, click button, see feedback panel
+**Entry point**: `src/app/practice/page.tsx` (or wherever the behavioral page
+lives — check `src/app/` for the exact path before editing).
 
-**Verification:**
-- `npm run type-check && npm test` green
-- `/technical` → write code → click button → see feedback
+**Verification checklist**:
+```
+npm run type-check   # must pass
+npm test             # must pass (currently 82 tests)
+npm run lint         # must pass
+```
+Then push to `claude/stupefied-swartz-cf9ca6` (or open a new worktree if the
+work is large enough to warrant isolation).

@@ -69,6 +69,15 @@ test.describe("Technical page", () => {
         }),
       }),
     )
+    await page.route("/api/code-review", route =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          review: "**Correctness**: Incorrect — returns empty array.\n**Complexity**: O(1) time.\n**Style**: Use a hash map for O(n) lookup.",
+        }),
+      }),
+    )
     await page.goto("/technical")
   })
 
@@ -93,5 +102,15 @@ test.describe("Technical page", () => {
   test("Home back link navigates to /", async ({ page }) => {
     await page.getByRole("link", { name: /Home/i }).click()
     await expect(page).toHaveURL(/\/$/)
+  })
+
+  test("Get AI Feedback button is visible", async ({ page }) => {
+    await expect(page.getByTestId("review-btn")).toBeVisible({ timeout: 10000 })
+  })
+
+  test("clicking Get AI Feedback shows the review panel", async ({ page }) => {
+    await page.getByTestId("review-btn").click()
+    await expect(page.getByTestId("review-panel")).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId("review-panel")).toContainText("Correctness")
   })
 })

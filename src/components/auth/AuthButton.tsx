@@ -36,7 +36,6 @@ export function AuthButton() {
   return (
     <div className="topbar-user">
       {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt="Profile" className="topbar-avatar" referrerPolicy="no-referrer" />
       ) : (
         <div className="topbar-avatar-fallback">{initials}</div>

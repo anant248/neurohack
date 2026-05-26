@@ -7,6 +7,8 @@ import { QuestionSelector } from "@/components/practice/QuestionSelector"
 import { VideoCapture } from "@/components/practice/VideoCapture"
 import { ResultsCard } from "@/components/practice/ResultsCard"
 import { HistoryModal } from "@/components/practice/HistoryModal"
+import { AuthButton } from "@/components/auth/AuthButton"
+import { FLAGS } from "@/lib/flags"
 import "./styles.css"
 
 export default function PracticePage() {
@@ -26,7 +28,11 @@ export default function PracticePage() {
   const handleStop = async () => {
     const result = await stop(selectedQuestion, history)
     if (result) {
-      addSession({ eyeContactScore: result.eyeContactScore, expressionScore: result.expressionScore })
+      addSession({
+        question: selectedQuestion,
+        eyeContactScore: result.eyeContactScore,
+        expressionScore: result.expressionScore,
+      })
     }
   }
 
@@ -45,6 +51,7 @@ export default function PracticePage() {
           </svg>
           <span>Interprep</span>
         </div>
+        {FLAGS.SUPABASE_PERSISTENCE && <AuthButton />}
         {history.length > 0 && (
           <button className="history-btn" onClick={() => setShowHistory(true)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

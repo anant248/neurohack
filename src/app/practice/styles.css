@@ -599,6 +599,82 @@ body {
   border-color: rgba(102, 126, 234, 0.5);
 }
 
+/* ==================== AUTH (topbar) ==================== */
+.auth-btn-skeleton {
+  width: 80px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.topbar-signin-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  background: rgba(102, 126, 234, 0.18);
+  border: 1.5px solid rgba(102, 126, 234, 0.4);
+  border-radius: 10px;
+  color: #a5b4fc;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.topbar-signin-btn:hover {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
+  color: white;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+.topbar-avatar-fallback {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: white;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+.topbar-signout-btn {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.topbar-signout-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 /* ==================== MODAL ==================== */
 .modal-overlay {
   position: fixed;

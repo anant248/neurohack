@@ -39,23 +39,19 @@ export async function POST(req: NextRequest): Promise<Response> {
         page_url: req.headers.get("referer") ?? null,
       })
       if (error) {
-        // Log full error object so it isn't truncated in Vercel logs
         console.error("[submit-feedback] insert failed:", JSON.stringify({
           code: error.code,
           message: error.message,
           details: error.details,
           hint: error.hint,
         }))
-        return Response.json({ ok: false, db_error: error.message, code: error.code }, { status: 200 })
+        // Still return 200 — don't surface DB errors to the client
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      console.error("[submit-feedback] unexpected error:", msg)
-      return Response.json({ ok: false, db_error: msg }, { status: 200 })
+      console.error("[submit-feedback] unexpected error:", err instanceof Error ? err.message : String(err))
     }
   } else {
     console.log(`[Feedback] no Supabase config — type=${type} message="${message.trim()}"`)
-    return Response.json({ ok: false, db_error: "Supabase not configured" }, { status: 200 })
   }
 
   return Response.json({ ok: true }, { status: 200 })

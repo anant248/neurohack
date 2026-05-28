@@ -1,0 +1,337 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==================== SHARED AUTH TOPBAR STYLES ==================== */
+/* Used by AuthButton on all pages — defined here so landing/technical don't need to re-declare */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-btn-skeleton {
+  width: 80px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  animation: auth-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes auth-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.topbar-signin-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  background: rgba(102, 126, 234, 0.18);
+  border: 1.5px solid rgba(102, 126, 234, 0.4);
+  border-radius: 10px;
+  color: #a5b4fc;
+  font-size: 0.83rem;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.topbar-signin-btn:hover {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
+  color: white;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+.topbar-avatar-fallback {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: white;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+.topbar-signout-btn {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.topbar-signout-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ==================== FEEDBACK BUBBLE ==================== */
+.fb-bubble {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 900;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fb-bubble:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 6px 22px rgba(102, 126, 234, 0.55);
+}
+
+.fb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 80px 24px 24px;
+  pointer-events: none;
+}
+
+.fb-overlay > .fb-modal {
+  pointer-events: all;
+}
+
+.fb-modal {
+  width: min(92vw, 360px);
+  background: linear-gradient(135deg, rgba(15, 12, 41, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fb-slide-up 0.25s ease-out;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@keyframes fb-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fb-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+}
+
+.fb-close {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.55);
+  transition: all 0.15s ease;
+}
+
+.fb-close:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+}
+
+.fb-close:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fb-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fb-type-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.fb-type-chip--active {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.55);
+  color: #a5b4fc;
+}
+
+.fb-type-chip:hover:not(.fb-type-chip--active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fb-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.87rem;
+  font-family: inherit;
+  line-height: 1.55;
+  resize: none;
+  transition: border-color 0.2s ease;
+}
+
+.fb-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.fb-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.fb-textarea:disabled {
+  opacity: 0.5;
+}
+
+.fb-error {
+  font-size: 0.8rem;
+  color: #f87171;
+  padding: 8px 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+}
+
+.fb-submit {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35);
+  transition: all 0.2s ease;
+}
+
+.fb-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(102, 126, 234, 0.45);
+}
+
+.fb-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fb-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: fb-spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes fb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.fb-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 10px 10px;
+}
+
+.fb-success-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #10b981;
+}

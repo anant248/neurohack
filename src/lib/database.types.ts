@@ -136,6 +136,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_feedback: {
+        Row: {
+          id: string
+          type: string
+          message: string
+          page_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          message: string
+          page_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          message?: string
+          page_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

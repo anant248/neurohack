@@ -66,7 +66,7 @@ export function QuestionSelector({ questions, selectedQuestion, onSelect }: Ques
       >
         <option value="">Choose a question…</option>
         {filtered.map((q, idx) => (
-          <option key={idx} value={q.text}>
+          <option key={idx} value={q.text} title={q.text}>
             {q.text}
           </option>
         ))}

@@ -40,12 +40,14 @@ export function usePrepSession() {
       }
       setSession(newSession)
 
-      // Persist metadata to Supabase when flag is on
+      // Persist metadata to Supabase when flag is on.
+      // We send the locally-generated UUID so the notes PATCH can reference it.
       if (FLAGS.SUPABASE_PERSISTENCE) {
         fetch("/api/prep-sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            id: newSession.id,
             companyName: data.companyName,
             role: data.role,
             jdText: data.jdText,

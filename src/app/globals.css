@@ -67,51 +67,103 @@ body {
   color: white;
 }
 
-.topbar-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* ── Auth floating action menu ── */
+.auth-fab {
+  position: relative;
 }
 
-.topbar-avatar {
-  width: 30px;
-  height: 30px;
+.auth-fab-trigger {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  object-fit: cover;
   border: 2px solid rgba(102, 126, 234, 0.5);
-}
-
-.topbar-avatar-fallback {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: white;
-  border: 2px solid rgba(102, 126, 234, 0.5);
+  overflow: hidden;
+  padding: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
 }
 
-.topbar-signout-btn {
-  padding: 5px 12px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.78rem;
+.auth-fab-trigger:hover {
+  border-color: rgba(102, 126, 234, 0.8);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.auth-fab-trigger--open {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.auth-fab-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auth-fab-initial {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1;
+}
+
+/* Dropdown panel */
+.auth-fab-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 999;
+}
+
+/* Individual pill items */
+.auth-fab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  background: rgba(30, 27, 58, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.83rem;
   font-weight: 600;
   font-family: 'Inter', system-ui, sans-serif;
+  text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  /* Slide-down entrance animation */
+  animation: fabSlideDown 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.topbar-signout-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
+.auth-fab-item:hover {
+  background: rgba(102, 126, 234, 0.25);
+  border-color: rgba(102, 126, 234, 0.4);
   color: white;
-  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.auth-fab-item--logout:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+@keyframes fabSlideDown {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
 }
 
 /* ==================== FEEDBACK BUBBLE ==================== */

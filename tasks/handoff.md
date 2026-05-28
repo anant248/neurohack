@@ -1,22 +1,23 @@
 # Session Handoff — Interprep Revamp
 
-**Branch**: `claude/stupefied-swartz-cf9ca6`
-**Last commit**: Phase 5 behavioral overhaul (uncommitted — run `git add -A && git commit`)
-**CI status**: ✅ type-check clean, 105/105 unit tests passing, lint clean
+**Branch**: `claude/stupefied-swartz-cf9ca6`  
+**Last commit**: `19662db` — chore: remove Account/Settings from auth dropdown  
+**CI status**: ✅ type-check clean, 105/105 unit tests passing, lint clean  
+**Vercel**: Deployed and Ready on preview URL
 
 ---
 
-## Goals
+## Goals We're Working Towards
 
-Evolve a hackathon face-tracking interview-prep app into a full platform.
-Full 8-phase plan lives in `.claude/plans/this-is-an-app-playful-parasol.md`.
+Evolve a hackathon face-tracking interview-prep app into a full interview prep platform.
+Full 8-phase plan lives in `.claude/plans/read-claude-md-for-your-tingly-hearth.md`.
 
-**Phases 1–5 are complete.** 
+**Phases 1–5 complete (including post-launch fixes).**
 
 Remaining:
-- Phase 6: User dashboard (session history, streaks)
-- Phase 7: Problem picker (search / filter LeetCode problems beyond daily)
-- Phase 8: Polish pass (animations, mobile layout, onboarding)
+- **Phase 6**: User dashboard (session history timeline, streaks, score charts)
+- **Phase 7**: Problem picker for `/technical` (search/filter beyond daily LeetCode)
+- **Phase 8**: Polish pass (mobile layout, animations, onboarding)
 
 ---
 
@@ -25,70 +26,84 @@ Remaining:
 ### Route map
 | Route | Status |
 |-------|--------|
-| `/` | ✅ Landing page — two mode cards (Behavioral + Technical) |
-| `/practice` | ✅ Phase 5 overhaul — resume + JD input → tailored questions + STAR hints + timer + company card + STAR bank |
-| `/technical` | ✅ Daily question + editor + Run Test Cases + AI review |
-| `/facelandmarker` | ✅ 301 → `/practice` (backward compat) |
+| `/` | ✅ Landing — two mode cards (Behavioral + Technical) + AuthButton |
+| `/practice` | ✅ Two-step flow: setup (resume + JD) → active session (company card, tailored questions, STAR hints, timer, notes, story bank) |
+| `/technical` | ✅ Daily LeetCode + CodeMirror editor + run tests (JS/Python) + AI code review |
 | `/auth` | ✅ Google + GitHub OAuth sign-in |
 | `/auth/callback` | ✅ OAuth code exchange |
-| `/api/feedback` | ✅ Gemini AI coaching — 3-section structured output (Visual Presence / STAR Tip / Key Focus) |
-| `/api/behavioral-prep` | ✅ NEW — resume + JD → company blurb + 8–10 tailored questions (Gemini JSON) |
-| `/api/fetch-jd` | ✅ NEW — server-side URL fetch + HTML-to-text proxy |
-| `/api/sessions` | ✅ GET + POST session history (Supabase-gated) |
-| `/api/leetcode` | ✅ Server proxy for LeetCode GraphQL (1-hour ISR cache) |
-| `/api/run-code` | ✅ JS-only execution via Node.js vm |
-| `/api/code-review` | ✅ Gemini code review (correctness / complexity / style) |
+| `/api/feedback` | ✅ Gemini coaching — 3-section output (Visual Presence / STAR Tip / Key Focus) |
+| `/api/behavioral-prep` | ✅ Resume + JD → company blurb + 8–10 tailored questions (Gemini JSON) |
+| `/api/behavioral-bank` | ✅ GET (list entries) + POST (create) |
+| `/api/behavioral-bank/[id]` | ✅ PATCH (update) + DELETE |
+| `/api/prep-sessions` | ✅ POST (save session with client-supplied UUID) |
+| `/api/prep-sessions/[id]/notes` | ✅ PATCH (update notes) |
+| `/api/fetch-jd` | ✅ Server-side URL fetch → intelligent job-content extraction |
+| `/api/submit-feedback` | ✅ POST → `user_feedback` Supabase table (service role, bypasses RLS) |
+| `/api/sessions` | ✅ GET + POST recording history (practice_sessions table) |
+| `/api/leetcode` | ✅ LeetCode GraphQL proxy (1-hour ISR cache) |
+| `/api/run-code` | ✅ JS via Node vm; Python handled client-side via Pyodide |
+| `/api/code-review` | ✅ Gemini code review |
 
-### Key files (active work lives here)
-
+### Key files
 ```
-src/app/practice/page.tsx                       — Two-step practice page (setup → session)
-src/app/practice/styles.css                     — All /practice styles (Phase 5 additions at bottom)
-src/app/api/behavioral-prep/route.ts            — Gemini question generation
-src/app/api/fetch-jd/route.ts                   — JD URL fetch proxy
-src/app/api/feedback/route.ts                   — Gemini feedback (500 token limit)
-src/lib/prompts.ts                              — buildFeedbackPrompt (3-section output)
-src/lib/types.ts                                — TailoredQuestion, PrepSession, BehavioralBankEntry
-src/hooks/useInterviewTimer.ts                  — Countdown timer hook
-src/hooks/useResume.ts                          — Resume localStorage persistence
-src/hooks/usePrepSession.ts                     — Active session state + Supabase sync
-src/hooks/useBehavioralBank.ts                  — STAR bank CRUD + localStorage/Supabase
-src/components/practice/SetupPanel.tsx          — Resume + JD input + generate button
-src/components/practice/CompanyCard.tsx         — Company blurb + external link
-src/components/practice/SessionNotes.tsx        — Notes textarea + save
-src/components/practice/BehavioralBankModal.tsx — STAR story bank modal
-src/components/practice/QuestionSelector.tsx    — Category filter + STAR hints
-src/components/practice/ResultsCard.tsx         — Sectioned AI feedback display
-src/components/practice/VideoCapture.tsx        — Timer overlay + camera error state
+src/app/practice/page.tsx                          — Two-step practice page (setup → session)
+src/app/practice/styles.css                        — All /practice styles
+src/app/technical/page.tsx                         — Technical page
+src/app/technical/styles.css                       — Technical styles
+src/app/page.tsx                                   — Landing page
+src/app/layout.tsx                                 — Root layout (FeedbackBubble injected here)
+src/app/globals.css                                — Shared auth styles + feedback bubble styles
+
+src/app/api/behavioral-prep/route.ts               — Gemini question generation
+src/app/api/behavioral-bank/route.ts               — GET/POST story bank entries
+src/app/api/behavioral-bank/[id]/route.ts          — PATCH/DELETE story bank entry
+src/app/api/prep-sessions/route.ts                 — POST save prep session
+src/app/api/prep-sessions/[id]/notes/route.ts      — PATCH session notes
+src/app/api/fetch-jd/route.ts                      — JD URL fetch + extraction
+src/app/api/submit-feedback/route.ts               — User feedback → Supabase
+
+src/hooks/useResume.ts                             — Resume localStorage (controlled via SetupPanel prop)
+src/hooks/usePrepSession.ts                        — Active session state + Supabase sync
+src/hooks/useBehavioralBank.ts                     — STAR bank CRUD + localStorage/Supabase
+src/hooks/useInterviewTimer.ts                     — Countdown timer
+src/hooks/useAuth.ts                               — Auth state (guards against missing env vars)
+
+src/components/auth/AuthButton.tsx                 — Floating FAB pill menu (avatar → Logout)
+src/components/FeedbackBubble.tsx                  — Global feedback/bug/feature bubble
+src/components/practice/SetupPanel.tsx             — Resume (controlled prop) + JD input
+src/components/practice/BehavioralBankModal.tsx    — List/form view STAR bank modal
+src/components/practice/QuestionSelector.tsx       — Category filter + STAR hints
+src/components/practice/VideoCapture.tsx           — Timer overlay + camera error state
+src/components/practice/ResultsCard.tsx            — Sectioned AI feedback display
+src/components/practice/CompanyCard.tsx            — Company blurb + link
+src/components/practice/SessionNotes.tsx           — Notes textarea + save
+
+src/lib/types.ts                                   — All shared types
+src/lib/database.types.ts                          — Supabase table types (all tables defined)
+src/lib/flags.ts                                   — FLAGS.SUPABASE_PERSISTENCE gate
 ```
-
-### How /technical works end-to-end
-
-1. **On mount**: fetches `/api/leetcode` → LeetCode daily question with
-   `title`, `titleSlug`, `difficulty`, `content` (HTML), `metaData` (JSON),
-   `exampleTestcases` (newline-separated inputs), `topicTags`.
-2. **Editor**: CodeMirror 6 with JS or Python syntax highlighting. Code is
-   persisted per-language in `sessionStorage` (`interprep-tech-code-js` /
-   `interprep-tech-code-py`). The editor opens with the method signature
-   generated from `metaData` via `generateStarterCode()`.
-3. **Run Test Cases (JS)**: POSTs `{ code, language: "js", exampleTestcases,
-   metaData, content }` to `/api/run-code`. The route uses
-   `vm.runInNewContext` with a 5-second timeout; no external service.
-4. **Run Test Cases (Python)**: Loads Pyodide (~10 MB) from CDN
-   (`cdn.jsdelivr.net/pyodide/v0.27.0/full/`) on first use, cached at module
-   level. Calls `pyodide.runPythonAsync(harness)` where the harness ends with
-   a bare `__json.dumps(__results)` expression so Pyodide captures the value.
-   Zero server round-trips for Python execution.
-5. **Get AI Feedback**: POSTs `{ code, language, problemTitle, problemContent }`
-   to `/api/code-review` → Gemini returns structured review (≤200 words).
 
 ### Env vars required (all set in Vercel)
 ```
-GOOGLE_GENERATIVE_AI_API_KEY      # Gemini — powers /api/feedback + /api/code-review
+GOOGLE_GENERATIVE_AI_API_KEY      # Gemini
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
-NEXT_PUBLIC_FEATURE_PERSISTENCE   # "true" to activate Phase 2 Supabase features
+SUPABASE_SERVICE_ROLE_KEY         # Used by /api/submit-feedback (bypasses RLS)
+NEXT_PUBLIC_FEATURE_PERSISTENCE   # "true" activates Supabase sync in hooks
+```
+
+### Supabase SQL GRANTs still needed (if not already applied)
+```sql
+-- Required for 42501 errors to go away:
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.practice_sessions TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.prep_sessions TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.behavioral_bank_entries TO authenticated;
+GRANT ALL ON public.user_feedback TO service_role;
+
+-- RLS policies (if not already created):
+ALTER TABLE behavioral_bank_entries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "users own their bank entries"
+  ON behavioral_bank_entries FOR ALL USING (auth.uid() = user_id);
 ```
 
 ### Design tokens (consistent across all pages)
@@ -102,7 +117,7 @@ NEXT_PUBLIC_FEATURE_PERSISTENCE   # "true" to activate Phase 2 Supabase features
 
 ## Files Actively Being Edited
 
-None — all Pyodide work committed cleanly. No in-progress changes.
+None — all work committed and pushed. No in-progress changes on the branch.
 
 ---
 
@@ -112,85 +127,50 @@ None — all Pyodide work committed cleanly. No in-progress changes.
 |---------|-----------------|-------------|
 | `database.types.ts` without `Relationships: []` | `@supabase/postgrest-js` requires the field; every `.from()` call returned `never[]` | Added `Relationships: []` to all table types |
 | `// eslint-disable-next-line @next/next/no-img-element` | ESLint config doesn't include Next.js plugin — disabling an unknown rule is itself an error | Removed the comment |
-| AI prompt included the LeetCode question text | Gemini inferred verbal content from a question it shouldn't have seen | Removed `question` from `buildFeedbackPrompt()` |
-| `#webcam` CSS selector | `<video>` element had no `id="webcam"` attribute | Changed selector to `.video-wrapper video` |
-| `GEMINI_API_KEY` env var name | Vercel had `GOOGLE_GENERATIVE_AI_API_KEY`; route silently returned 503 | Added fallback chain: `process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY` |
-| Open redirect in `/auth/callback` via `?next` param | `?next=//evil.com` composed to a cross-origin redirect | Sanitised: only accept values starting `/` and not `//` |
-| `?error=oauth_failed` silently ignored | `AuthForm` never read URL search params | Added `useEffect` that reads `window.location.search` on mount |
-| `vi.stubEnv` leak between tests in `code-review.test.ts` | One test stubbed the API key to empty; the stub leaked into the next test, flipping its expected status code | Added `afterEach(() => vi.unstubAllEnvs())` and `vi.unstubAllEnvs()` in `beforeEach` |
-| CodeMirror Tab binding didn't fire | Custom `keymap.of([{ key: "Tab", run: acceptCompletion }])` was appended after `basicSetup` in the extensions array; `basicSetup`'s Tab→indent fired first | Wrapped with `Prec.highest()` so the custom binding wins priority |
-| Python test runner via Piston API | `emkc.org/api/v2/piston/execute` blocks Vercel serverless egress IPs; all Python runs returned 503 in production | Replaced with client-side Pyodide (WebAssembly); no server round-trip for Python |
-| Piston harness used `print(__json.dumps(__results))` | `pyodide.runPythonAsync()` captures the last expression value, not stdout; `print()` returns `None` | `buildPyHarnessClient()` ends with bare `__json.dumps(__results)` expression |
+| AI prompt included the LeetCode question text | Gemini inferred verbal content it can't hear | Removed `question` from `buildFeedbackPrompt()` |
+| `#webcam` CSS selector | `<video>` had no `id="webcam"` | Changed to `.video-wrapper video` |
+| `GEMINI_API_KEY` env var name | Vercel had `GOOGLE_GENERATIVE_AI_API_KEY` | Fallback chain: `process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? process.env.GEMINI_API_KEY` |
+| Open redirect in `/auth/callback` via `?next` param | `?next=//evil.com` composed to cross-origin redirect | Sanitised: only accept values starting `/` and not `//` |
+| `?error=oauth_failed` silently ignored by `AuthForm` | Page never read URL search params | Added `useEffect` reading `window.location.search` on mount |
+| `vi.stubEnv` leak between tests | Stub leaked into next test, flipping expected status | Added `afterEach(() => vi.unstubAllEnvs())` |
+| CodeMirror Tab binding didn't fire | Custom keymap appended after `basicSetup`; `basicSetup`'s Tab→indent won | Wrapped with `Prec.highest()` |
+| Python test runner via Piston API | `emkc.org` blocks Vercel serverless IPs; 503 in production | Replaced with client-side Pyodide (WebAssembly) |
+| Pyodide harness used `print(__json.dumps(__results))` | `pyodide.runPythonAsync()` captures last expression, not stdout | Harness ends with bare `__json.dumps(__results)` expression |
+| `page.getByText("Test Corp")` in Playwright | Matched 3 elements; strict mode throws | Changed to `page.getByRole("heading", { name: "Test Corp" })` |
+| `user_feedback` table GRANT missing | Tables created via SQL Editor don't auto-grant `service_role`; all inserts returned 42501 | Ran `GRANT ALL ON user_feedback TO service_role` + enabled RLS + insert policy |
+| `createBrowserClient("", "")` in E2E (no env vars) | Throws and unmounts entire React tree; all pages blank in CI | Added env var guard in `useAuth` before first `createClient()` call |
+| `useState(initialResumeText)` in `SetupPanel` | Only runs at mount; localStorage hydrates after mount via `useEffect` in parent; component never saw the update; resume always appeared empty on return | Made `resumeText` a controlled prop — removed local state, pass value directly from `useResume()` |
+| `POST /api/prep-sessions` didn't include client UUID | Server generated a different UUID; subsequent `PATCH /api/prep-sessions/${session.id}/notes` matched no row | Hook now sends `id: newSession.id` in POST body |
+| `/api/behavioral-bank` and `/api/prep-sessions` routes were 404 | Hook files were written referencing routes that were never created | Created all four missing route files |
+| JD URL extraction returned all page text (nav, sidebar, etc.) | `htmlToText()` stripped tags but kept all content | Strip `<nav>`/`<header>`/`<footer>`/`<aside>`, prefer `<main>`/`<article>`, keyword-filter long pages |
+| Excessive newlines in JD fetch output | Block-element `\n` replacement + empty `<div>` closings created runs of blank lines | Collapse all `\n{2,}` → `\n` after extraction |
 
 ---
 
-## Supabase SQL to Apply
-
-Before Phase 5 features work in production, run this SQL in the Supabase SQL editor:
-
-```sql
-create table prep_sessions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade,
-  company_name text not null,
-  role text not null,
-  jd_text text,
-  company_blurb text,
-  questions_json jsonb,
-  notes text default '',
-  created_at timestamptz default now()
-);
-
-create table behavioral_bank_entries (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade,
-  title text not null,
-  situation text default '',
-  task text default '',
-  action text default '',
-  result text default '',
-  tags text[] default '{}',
-  created_at timestamptz default now()
-);
-
-alter table prep_sessions enable row level security;
-alter table behavioral_bank_entries enable row level security;
-create policy "users own their prep sessions" on prep_sessions for all using (auth.uid() = user_id);
-create policy "users own their bank entries" on behavioral_bank_entries for all using (auth.uid() = user_id);
-```
-
-The `usePrepSession` and `useBehavioralBank` hooks call placeholder API routes
-(`/api/prep-sessions`, `/api/behavioral-bank`) that need to be built when enabling
-`NEXT_PUBLIC_FEATURE_PERSISTENCE=true`. They work fine without Supabase in local mode.
-
 ## Next Step
 
-Start **Phase 6: User dashboard** (session history, streaks).
+Start **Phase 6: User Dashboard**.
 
-The current `/practice` page exists but was built during the hackathon and is
-rough. The goals:
+The groundwork is already there — `useSessionHistory` captures practice attempts in memory (and Supabase when `FLAGS.SUPABASE_PERSISTENCE` is on via `/api/sessions`). The dashboard needs to surface this data meaningfully.
 
-1. **STAR-method prompt system** — show a structured prompt (Situation, Task,
-   Action, Result) rather than a free-form question. Fetch or hardcode a bank
-   of behavioural questions.
-2. **Interview timer** — visible countdown (e.g. 2 minutes per answer) with a
-   soft warning at 30 seconds.
-3. **Remove webcam dependency for users who decline** — face tracking is
-   interesting but optional; the page should be fully usable without camera
-   permission. Degrade gracefully.
-4. **Cleaner feedback display** — the Gemini response currently renders as
-   plain text; add the same structured sections (Situation / Task / Action /
-   Result quality, filler-word count, pacing) that the `/technical` AI review
-   uses.
+**Goals for Phase 6:**
+1. New `/dashboard` route — timeline of past sessions with scores
+2. Streak counter (consecutive days with at least one recorded attempt)
+3. Score trend sparklines (eye contact + expression score over last N sessions)
+4. "Best session" highlight
+5. Navigation: link from landing page + practice topbar "History" button goes here instead of the modal
 
-**Entry point**: `src/app/practice/page.tsx` (or wherever the behavioral page
-lives — check `src/app/` for the exact path before editing).
+**Entry point**: Create `src/app/dashboard/page.tsx`. Wire to `/api/sessions` for data. Reuse the existing glass card + accent token system for consistent styling.
 
-**Verification checklist**:
+**Verification**:
+```bash
+npm run type-check   # zero errors
+npm test             # 105+ tests pass
+npm run lint         # clean
 ```
-npm run type-check   # must pass
-npm test             # must pass (currently 82 tests)
-npm run lint         # must pass
+
+Push to `claude/stupefied-swartz-cf9ca6` or open a new worktree:
+```bash
+# from repo root on revamp branch:
+git worktree add .claude/worktrees/<name> -b claude/<name>
 ```
-Then push to `claude/stupefied-swartz-cf9ca6` (or open a new worktree if the
-work is large enough to warrant isolation).

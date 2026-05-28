@@ -43,8 +43,8 @@ export default function RootPage() {
 
             <div className="mode-card-title">Behavioral Practice</div>
             <div className="mode-card-desc">
-              Answer common interview questions on camera. AI analyzes your eye contact and
-              expressions, then gives personalised coaching.
+              Get tailored interview questions based on your resume and specific job descriptions. Then, AI analyzes your eye contact and
+              expressions, and gives personalised coaching.
             </div>
 
             <div className="mode-card-features">
@@ -78,7 +78,7 @@ export default function RootPage() {
             <div className="mode-card-title">Technical Interview</div>
             <div className="mode-card-desc">
               Solve today&apos;s LeetCode daily challenge in a real code editor with syntax
-              highlighting, optional webcam, and language switching.
+              highlighting, and language switching.
             </div>
 
             <div className="mode-card-features">

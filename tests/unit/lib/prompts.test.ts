@@ -18,9 +18,14 @@ describe("buildFeedbackPrompt", () => {
     expect(prompt).toContain("60%")
   })
 
-  it("does NOT embed the question text in the prompt (prevents verbal-content inference)", () => {
+  it("embeds the question for STAR coaching context but explicitly prohibits verbal inference", () => {
+    // Phase 5 intentional change: question IS included to provide STAR framework tips
+    // specific to the question type. The prompt must explicitly prohibit Gemini from
+    // evaluating what the candidate said (no audio is available).
     const prompt = buildFeedbackPrompt(base)
-    expect(prompt).not.toContain("Tell me about yourself.")
+    expect(prompt).toContain("Tell me about yourself.")
+    // Must tell Gemini it cannot hear the candidate
+    expect(prompt.toLowerCase()).toMatch(/no audio|cannot hear|have no audio/)
   })
 
   it("omits progress context when previousScores is not provided", () => {
@@ -75,5 +80,12 @@ describe("buildFeedbackPrompt", () => {
   it("returns a non-empty string for any valid input", () => {
     const prompt = buildFeedbackPrompt({ eyeContactScore: 0, expressionScore: 0, question: "x" })
     expect(prompt.length).toBeGreaterThan(50)
+  })
+
+  it("includes three structured section headings", () => {
+    const prompt = buildFeedbackPrompt(base)
+    expect(prompt).toContain("**Visual Presence:**")
+    expect(prompt).toContain("**STAR Tip:**")
+    expect(prompt).toContain("**Key Focus:**")
   })
 })

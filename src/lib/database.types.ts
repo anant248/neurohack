@@ -64,6 +64,78 @@ export type Database = {
         }
         Relationships: []
       }
+      prep_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          company_name: string
+          role: string
+          jd_text: string | null
+          company_blurb: string | null
+          questions_json: unknown
+          notes: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          company_name: string
+          role: string
+          jd_text?: string | null
+          company_blurb?: string | null
+          questions_json?: unknown
+          notes?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          company_name?: string
+          role?: string
+          jd_text?: string | null
+          company_blurb?: string | null
+          questions_json?: unknown
+          notes?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      behavioral_bank_entries: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          situation: string
+          task: string
+          action: string
+          result: string
+          tags: string[]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          situation?: string
+          task?: string
+          action?: string
+          result?: string
+          tags?: string[]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          situation?: string
+          task?: string
+          action?: string
+          result?: string
+          tags?: string[]
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

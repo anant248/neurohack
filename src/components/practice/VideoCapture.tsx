@@ -12,6 +12,15 @@ interface VideoCaptureProps {
   hasQuestion: boolean
   onStart: () => void
   onStop: () => void
+  timeLeft?: number | null
+  isTimerWarning?: boolean
+  cameraError?: string | null
+}
+
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, "0")}`
 }
 
 export function VideoCapture({
@@ -23,6 +32,9 @@ export function VideoCapture({
   hasQuestion,
   onStart,
   onStop,
+  timeLeft,
+  isTimerWarning,
+  cameraError,
 }: VideoCaptureProps) {
   // Placeholder when idle; transparent when recording so the video shows through
   useEffect(() => {
@@ -66,7 +78,31 @@ export function VideoCapture({
     ctx.fillText("Select a question, then hit Start Recording", canvas.width / 2, canvas.height / 2 + 120)
   }, [isRecording, canvasRef])
 
-  const canStart = isReady && hasQuestion && !isRecording && !isAnalyzing
+  const canStart = isReady && hasQuestion && !isRecording && !isAnalyzing && !cameraError
+
+  if (cameraError) {
+    return (
+      <div className="video-panel">
+        <div className="camera-error-panel">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d="M3 3l18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <p className="camera-error-title">Camera Unavailable</p>
+          <p className="camera-error-msg">{cameraError}</p>
+          <p className="camera-error-sub">
+            You can still practise using the question selector and STAR framework guide on the left.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="video-panel">
@@ -77,6 +113,15 @@ export function VideoCapture({
           <div className="recording-indicator">
             <span className="recording-dot" />
             REC
+          </div>
+        )}
+        {isRecording && timeLeft !== null && timeLeft !== undefined && (
+          <div className={`timer-overlay${isTimerWarning ? " timer-overlay--warning" : ""}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+              <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span>{formatTime(timeLeft)}</span>
           </div>
         )}
       </div>

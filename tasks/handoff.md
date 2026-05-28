@@ -1,8 +1,8 @@
 # Session Handoff — Interprep Revamp
 
 **Branch**: `claude/stupefied-swartz-cf9ca6`
-**Last commit**: `a12ce81` — feat(python): replace Piston with client-side Pyodide (WebAssembly)
-**CI status**: ✅ type-check clean, 82/82 unit tests passing, lint clean
+**Last commit**: Phase 5 behavioral overhaul (uncommitted — run `git add -A && git commit`)
+**CI status**: ✅ type-check clean, 105/105 unit tests passing, lint clean
 
 ---
 
@@ -11,10 +11,9 @@
 Evolve a hackathon face-tracking interview-prep app into a full platform.
 Full 8-phase plan lives in `.claude/plans/this-is-an-app-playful-parasol.md`.
 
-**Phases 1–4 are complete.** The active surface is `/technical`.
+**Phases 1–5 are complete.** 
 
-Longer-term targets not yet started:
-- Phase 5: Behavioral page overhaul (structured STAR-method prompts, timer)
+Remaining:
 - Phase 6: User dashboard (session history, streaks)
 - Phase 7: Problem picker (search / filter LeetCode problems beyond daily)
 - Phase 8: Polish pass (animations, mobile layout, onboarding)
@@ -27,12 +26,14 @@ Longer-term targets not yet started:
 | Route | Status |
 |-------|--------|
 | `/` | ✅ Landing page — two mode cards (Behavioral + Technical) |
-| `/practice` | ✅ Face tracking + AI feedback + history modal |
+| `/practice` | ✅ Phase 5 overhaul — resume + JD input → tailored questions + STAR hints + timer + company card + STAR bank |
 | `/technical` | ✅ Daily question + editor + Run Test Cases + AI review |
 | `/facelandmarker` | ✅ 301 → `/practice` (backward compat) |
 | `/auth` | ✅ Google + GitHub OAuth sign-in |
 | `/auth/callback` | ✅ OAuth code exchange |
-| `/api/feedback` | ✅ Gemini AI coaching (behavioral) |
+| `/api/feedback` | ✅ Gemini AI coaching — 3-section structured output (Visual Presence / STAR Tip / Key Focus) |
+| `/api/behavioral-prep` | ✅ NEW — resume + JD → company blurb + 8–10 tailored questions (Gemini JSON) |
+| `/api/fetch-jd` | ✅ NEW — server-side URL fetch + HTML-to-text proxy |
 | `/api/sessions` | ✅ GET + POST session history (Supabase-gated) |
 | `/api/leetcode` | ✅ Server proxy for LeetCode GraphQL (1-hour ISR cache) |
 | `/api/run-code` | ✅ JS-only execution via Node.js vm |
@@ -41,14 +42,24 @@ Longer-term targets not yet started:
 ### Key files (active work lives here)
 
 ```
-src/app/technical/page.tsx        — Main technical interview page
-src/app/technical/styles.css      — Styles for /technical
-src/app/api/run-code/route.ts     — JS code execution (vm.runInNewContext)
-src/app/api/code-review/route.ts  — Gemini code review endpoint
-src/lib/codeRunner.ts             — parseTestCases, buildJSHarness,
-                                    buildPyHarnessClient, generateStarterCode
-src/lib/leetcode.ts               — fetchDailyQuestion() + 3 fallback questions
-src/lib/codeReviewPrompt.ts       — buildCodeReviewPrompt()
+src/app/practice/page.tsx                       — Two-step practice page (setup → session)
+src/app/practice/styles.css                     — All /practice styles (Phase 5 additions at bottom)
+src/app/api/behavioral-prep/route.ts            — Gemini question generation
+src/app/api/fetch-jd/route.ts                   — JD URL fetch proxy
+src/app/api/feedback/route.ts                   — Gemini feedback (500 token limit)
+src/lib/prompts.ts                              — buildFeedbackPrompt (3-section output)
+src/lib/types.ts                                — TailoredQuestion, PrepSession, BehavioralBankEntry
+src/hooks/useInterviewTimer.ts                  — Countdown timer hook
+src/hooks/useResume.ts                          — Resume localStorage persistence
+src/hooks/usePrepSession.ts                     — Active session state + Supabase sync
+src/hooks/useBehavioralBank.ts                  — STAR bank CRUD + localStorage/Supabase
+src/components/practice/SetupPanel.tsx          — Resume + JD input + generate button
+src/components/practice/CompanyCard.tsx         — Company blurb + external link
+src/components/practice/SessionNotes.tsx        — Notes textarea + save
+src/components/practice/BehavioralBankModal.tsx — STAR story bank modal
+src/components/practice/QuestionSelector.tsx    — Category filter + STAR hints
+src/components/practice/ResultsCard.tsx         — Sectioned AI feedback display
+src/components/practice/VideoCapture.tsx        — Timer overlay + camera error state
 ```
 
 ### How /technical works end-to-end
@@ -113,9 +124,48 @@ None — all Pyodide work committed cleanly. No in-progress changes.
 
 ---
 
+## Supabase SQL to Apply
+
+Before Phase 5 features work in production, run this SQL in the Supabase SQL editor:
+
+```sql
+create table prep_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  company_name text not null,
+  role text not null,
+  jd_text text,
+  company_blurb text,
+  questions_json jsonb,
+  notes text default '',
+  created_at timestamptz default now()
+);
+
+create table behavioral_bank_entries (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  title text not null,
+  situation text default '',
+  task text default '',
+  action text default '',
+  result text default '',
+  tags text[] default '{}',
+  created_at timestamptz default now()
+);
+
+alter table prep_sessions enable row level security;
+alter table behavioral_bank_entries enable row level security;
+create policy "users own their prep sessions" on prep_sessions for all using (auth.uid() = user_id);
+create policy "users own their bank entries" on behavioral_bank_entries for all using (auth.uid() = user_id);
+```
+
+The `usePrepSession` and `useBehavioralBank` hooks call placeholder API routes
+(`/api/prep-sessions`, `/api/behavioral-bank`) that need to be built when enabling
+`NEXT_PUBLIC_FEATURE_PERSISTENCE=true`. They work fine without Supabase in local mode.
+
 ## Next Step
 
-Start **Phase 5: Behavioral page overhaul**.
+Start **Phase 6: User dashboard** (session history, streaks).
 
 The current `/practice` page exists but was built during the hackathon and is
 rough. The goals:

@@ -25,7 +25,7 @@ async function completeSetup(page: Page) {
   await page.locator("textarea:not(#resume-input)").first().fill("Test Corp is hiring a Software Engineer.")
   await page.getByRole("button", { name: /Generate Tailored Questions/i }).click()
   // Wait for the session view — company card heading signals setup is complete
-  await expect(page.getByText("Test Corp")).toBeVisible({ timeout: 10000 })
+  await expect(page.getByRole("heading", { name: "Test Corp" })).toBeVisible({ timeout: 10000 })
 }
 
 test.describe("Practice page", () => {
@@ -65,7 +65,7 @@ test.describe("Practice page", () => {
 
   test("shows company card with name and link after setup", async ({ page }) => {
     await completeSetup(page)
-    await expect(page.getByText("Test Corp")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Test Corp" })).toBeVisible()
     await expect(page.getByText("Software Engineer")).toBeVisible()
     await expect(page.getByRole("link", { name: /Learn more about Test Corp/i })).toBeVisible()
   })

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
+import { AuthButton } from "@/components/auth/AuthButton"
 import { keymap } from "@codemirror/view"
 import { Prec } from "@codemirror/state"
 import { acceptCompletion, closeCompletion, completionStatus } from "@codemirror/autocomplete"
@@ -294,7 +295,7 @@ export default function TechnicalPage() {
   return (
     <div className="technical-layout">
       <header className="technical-topbar">
-        <div className="topbar-logo">
+        <Link href="/" className="topbar-logo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
               d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
@@ -302,13 +303,10 @@ export default function TechnicalPage() {
             />
           </svg>
           Interprep
-        </div>
-        <Link href="/" className="topbar-back">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Home
         </Link>
+        <div className="topbar-actions">
+          <AuthButton />
+        </div>
       </header>
 
       <main className="technical-main">

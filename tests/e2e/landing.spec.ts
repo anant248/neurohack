@@ -99,8 +99,8 @@ test.describe("Technical page", () => {
     await expect(page.getByText("Hash Table")).toBeVisible({ timeout: 10000 })
   })
 
-  test("Home back link navigates to /", async ({ page }) => {
-    await page.getByRole("link", { name: /Home/i }).click()
+  test("Interprep logo navigates to /", async ({ page }) => {
+    await page.getByRole("link", { name: "Interprep" }).click()
     await expect(page).toHaveURL(/\/$/)
   })
 

@@ -7,13 +7,16 @@ export interface FeedbackPromptParams {
 
 /**
  * Builds the Gemini prompt for interview feedback coaching.
- * Feedback is based ONLY on visual face-tracking data — the AI cannot
- * hear the candidate and must not infer or comment on verbal content.
+ *
+ * The question IS included so Gemini can give STAR framework tips specific to
+ * the question type. However, the prompt explicitly forbids inferring what the
+ * candidate said — there is no audio, so verbal content evaluation is impossible.
+ *
+ * Output is structured into three labeled sections that ResultsCard can parse
+ * and render individually.
  */
 export function buildFeedbackPrompt(params: FeedbackPromptParams): string {
-  const { eyeContactScore, expressionScore, previousScores } = params
-  // question is intentionally excluded from the prompt — including it caused
-  // Gemini to comment on the candidate's answer content, which it cannot hear.
+  const { eyeContactScore, expressionScore, question, previousScores } = params
 
   let progressContext = ""
   if (previousScores && previousScores.length > 0) {
@@ -27,15 +30,23 @@ export function buildFeedbackPrompt(params: FeedbackPromptParams): string {
 
   const leadPositive = eyeContactScore >= 60 || expressionScore >= 60
 
-  return `You are an interview coach reviewing face-tracking data only. You have no audio — you cannot assess what the candidate said. Give feedback on visual presence exclusively.
+  return `You are an interview coach. CRITICAL: You have NO audio. You cannot hear the candidate's answer and must NOT infer, assume, or comment on what they said. You saw only face-tracking data.
+
+Question the candidate practised (for STAR tip context only — do NOT evaluate their answer):
+"${question}"
 
 Face-tracking metrics:
-- Eye Contact: ${eyeContactScore}% (how consistently they looked at the camera lens)
-- Positive Expression: ${expressionScore}% (warm, engaged facial expressions like smiling)
+- Eye Contact: ${eyeContactScore}% (how consistently they looked at the camera)
+- Positive Expression: ${expressionScore}% (warm, engaged facial expressions)
 ${progressContext}
-Write exactly 2–3 sentences. Rules (strict):
-1. Discuss ONLY eye contact and/or facial expression — nothing else
-2. Do NOT reference the question topic, their answer, or what they may have said
-3. Include one specific, concrete technique (e.g., "focus on the camera dot, not your reflection")
-4. ${leadPositive ? "Start with a genuine strength, then give the key improvement." : "Be encouraging about their effort, then give the most impactful fix."}`
+Write exactly three sections using these exact headings. ≤2 sentences per section.
+
+**Visual Presence:**
+${leadPositive ? "Start with a genuine strength based on the scores, then give the key improvement." : "Be encouraging about their effort based on the scores, then give the most impactful fix."} Discuss ONLY eye contact and/or facial expression.
+
+**STAR Tip:**
+Give one actionable tip for structuring an answer to this specific question type using the STAR framework. Do NOT comment on what the candidate actually said.
+
+**Key Focus:**
+One single concrete technique to practise before their next attempt.`
 }

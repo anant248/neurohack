@@ -1,23 +1,35 @@
 "use client"
 
-import { INTERVIEW_QUESTIONS } from "@/lib/constants"
+import { useState } from "react"
+import type { TailoredQuestion } from "@/lib/types"
 
 interface QuestionSelectorProps {
+  questions: TailoredQuestion[]
   selectedQuestion: string
   onSelect: (question: string) => void
 }
 
-export function QuestionSelector({ selectedQuestion, onSelect }: QuestionSelectorProps) {
+const ALL_CATEGORY = "All"
+
+export function QuestionSelector({ questions, selectedQuestion, onSelect }: QuestionSelectorProps) {
+  const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORY)
+
+  const categories = [ALL_CATEGORY, ...Array.from(new Set(questions.map(q => q.category)))]
+  const filtered = categoryFilter === ALL_CATEGORY ? questions : questions.filter(q => q.category === categoryFilter)
+
   const pickRandom = () => {
-    const idx = Math.floor(Math.random() * INTERVIEW_QUESTIONS.length)
-    onSelect(INTERVIEW_QUESTIONS[idx])
+    if (filtered.length === 0) return
+    const idx = Math.floor(Math.random() * filtered.length)
+    onSelect(filtered[idx].text)
   }
+
+  const selectedObj = questions.find(q => q.text === selectedQuestion)
 
   return (
     <div className="question-panel">
       <div className="question-panel-header">
         <label className="question-label" htmlFor="question-select">
-          Interview Question
+          Practice Question
         </label>
         <button className="random-btn" onClick={pickRandom} type="button">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -30,6 +42,22 @@ export function QuestionSelector({ selectedQuestion, onSelect }: QuestionSelecto
         </button>
       </div>
 
+      {/* Category filter */}
+      {categories.length > 2 && (
+        <div className="category-filter">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              type="button"
+              className={`category-chip${categoryFilter === cat ? " category-chip--active" : ""}`}
+              onClick={() => setCategoryFilter(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
       <select
         id="question-select"
         className="question-dropdown"
@@ -37,15 +65,27 @@ export function QuestionSelector({ selectedQuestion, onSelect }: QuestionSelecto
         onChange={e => onSelect(e.target.value)}
       >
         <option value="">Choose a question…</option>
-        {INTERVIEW_QUESTIONS.map((q, idx) => (
-          <option key={idx} value={q}>
-            {q}
+        {filtered.map((q, idx) => (
+          <option key={idx} value={q.text} title={q.text}>
+            {q.text}
           </option>
         ))}
       </select>
 
-      {selectedQuestion && (
-        <p className="selected-question-inline">❝ {selectedQuestion}</p>
+      {selectedObj && (
+        <div className="selected-question-block">
+          <p className="selected-question-text">❝ {selectedObj.text}</p>
+          {selectedObj.starHint && (
+            <div className="star-hint">
+              <div className="star-hint-header">
+                <span className="star-badge">STAR</span>
+                <span className="star-hint-label">Framework tip</span>
+              </div>
+              <p className="star-hint-text">{selectedObj.starHint}</p>
+            </div>
+          )}
+          <span className="question-category-badge">{selectedObj.category}</span>
+        </div>
       )}
     </div>
   )

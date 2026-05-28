@@ -10,6 +10,7 @@ export function useFaceLandmarker() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isAiLoading, setIsAiLoading] = useState(false)
   const [results, setResults] = useState<FeedbackResult | null>(null)
+  const [cameraError, setCameraError] = useState<string | null>(null)
   const sessionRef = useRef<FaceLandmarkerSession | null>(null)
 
   useEffect(() => {
@@ -33,9 +34,22 @@ export function useFaceLandmarker() {
   const start = useCallback(
     async (videoEl: HTMLVideoElement, canvasEl: HTMLCanvasElement) => {
       if (!sessionRef.current || !isReady) return
+      setCameraError(null)
       setResults(null)
       setIsRecording(true)
-      await sessionRef.current.start(videoEl, canvasEl)
+      try {
+        await sessionRef.current.start(videoEl, canvasEl)
+      } catch (err) {
+        setIsRecording(false)
+        const name = err instanceof Error ? err.name : ""
+        if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+          setCameraError("Camera permission was denied. Grant access in your browser settings to use face tracking.")
+        } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+          setCameraError("No camera found. Connect a webcam to use face tracking.")
+        } else {
+          setCameraError("Could not access the camera. Please check your device settings.")
+        }
+      }
     },
     [isReady],
   )
@@ -82,7 +96,8 @@ export function useFaceLandmarker() {
 
   const reset = useCallback(() => {
     setResults(null)
+    setCameraError(null)
   }, [])
 
-  return { isReady, isRecording, isAnalyzing, isAiLoading, results, start, stop, reset }
+  return { isReady, isRecording, isAnalyzing, isAiLoading, results, cameraError, start, stop, reset }
 }

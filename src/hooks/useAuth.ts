@@ -14,6 +14,12 @@ export function useAuth(): AuthState {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Bail out gracefully when Supabase is not configured (e.g. E2E test env)
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setLoading(false)
+      return
+    }
+
     const supabase = createClient()
 
     // Hydrate from the current session

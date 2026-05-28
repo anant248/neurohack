@@ -10,14 +10,16 @@
 ## Goals We're Working Towards
 
 Evolve a hackathon face-tracking interview-prep app into a full interview prep platform.
-Full 8-phase plan lives in `.claude/plans/read-claude-md-for-your-tingly-hearth.md`.
+Full plan lives in `tasks/todo.md`.
 
 **Phases 1–5 complete (including post-launch fixes).**
 
 Remaining:
-- **Phase 6**: User dashboard (session history timeline, streaks, score charts)
-- **Phase 7**: Problem picker for `/technical` (search/filter beyond daily LeetCode)
-- **Phase 8**: Polish pass (mobile layout, animations, onboarding)
+- **Phase 6**: Mobile responsive rewrite — make the app clean and fully functional on phones/tablets. Scope (which features are included/excluded on mobile) to be defined by the user before implementation.
+- **Phase 7**: Full frontend UI rewrite — replace the current generic purple-gradient aesthetic with a premium, minimalist feel using Framer Motion + shadcn/ui. Color scheme, typography, and animation references to be provided by the user before implementation.
+
+Optional / later:
+- User dashboard (streaks, score history), problem picker for `/technical`, onboarding, PWA
 
 ---
 
@@ -149,27 +151,32 @@ None — all work committed and pushed. No in-progress changes on the branch.
 
 ## Next Step
 
-Start **Phase 6: User Dashboard**.
+**Phase 6: Mobile Responsive Rewrite** — awaiting user input on scope.
 
-The groundwork is already there — `useSessionHistory` captures practice attempts in memory (and Supabase when `FLAGS.SUPABASE_PERSISTENCE` is on via `/api/sessions`). The dashboard needs to surface this data meaningfully.
+Before starting, the user will define:
+1. Which pages are in scope for mobile (all three? landing + practice only?)
+2. Which features are excluded on small screens (webcam/face tracking? code editor?)
+3. Preferred mobile navigation pattern (bottom tabs? hamburger drawer?)
 
-**Goals for Phase 6:**
-1. New `/dashboard` route — timeline of past sessions with scores
-2. Streak counter (consecutive days with at least one recorded attempt)
-3. Score trend sparklines (eye contact + expression score over last N sessions)
-4. "Best session" highlight
-5. Navigation: link from landing page + practice topbar "History" button goes here instead of the modal
+Once scope is locked, the implementation approach is:
+- CSS media queries + flexbox/grid reflow (no separate mobile codebase)
+- Likely disable face tracking on mobile (MediaPipe is heavy; camera permission UX is worse)
+- Practice page collapses from 2-column grid to single-column stack
+- Technical page may be read-only (question + AI review) without the editor on mobile
 
-**Entry point**: Create `src/app/dashboard/page.tsx`. Wire to `/api/sessions` for data. Reuse the existing glass card + accent token system for consistent styling.
+**Phase 7: UI Rewrite** — awaiting user's color scheme, font choices, and animation references.
 
-**Verification**:
+The user wants: premium, minimalist feel. Tech stack: Framer Motion + shadcn/ui.
+Layout positions stay largely the same — this is a pure visual layer swap.
+
+**Verification for any phase**:
 ```bash
 npm run type-check   # zero errors
 npm test             # 105+ tests pass
 npm run lint         # clean
 ```
 
-Push to `claude/stupefied-swartz-cf9ca6` or open a new worktree:
+Open a new worktree for each phase:
 ```bash
 # from repo root on revamp branch:
 git worktree add .claude/worktrees/<name> -b claude/<name>

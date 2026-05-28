@@ -36,19 +36,26 @@ export async function POST(req: NextRequest): Promise<Response> {
       const { error } = await supabase.from("user_feedback").insert({
         type: type as FeedbackType,
         message: message.trim(),
-        // include page URL from referrer header if available
         page_url: req.headers.get("referer") ?? null,
       })
       if (error) {
-        console.error("[submit-feedback] Supabase insert error:", error.message)
-        // Still return 200 — don't block the user on DB issues
+        // Log full error object so it isn't truncated in Vercel logs
+        console.error("[submit-feedback] insert failed:", JSON.stringify({
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        }))
+        return Response.json({ ok: false, db_error: error.message, code: error.code }, { status: 200 })
       }
     } catch (err) {
-      console.error("[submit-feedback] Unexpected error:", err)
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error("[submit-feedback] unexpected error:", msg)
+      return Response.json({ ok: false, db_error: msg }, { status: 200 })
     }
   } else {
-    // Log to console in dev / when Supabase not configured
-    console.log(`[Feedback] type=${type} message="${message.trim()}"`)
+    console.log(`[Feedback] no Supabase config — type=${type} message="${message.trim()}"`)
+    return Response.json({ ok: false, db_error: "Supabase not configured" }, { status: 200 })
   }
 
   return Response.json({ ok: true }, { status: 200 })

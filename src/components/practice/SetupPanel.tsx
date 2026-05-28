@@ -4,24 +4,19 @@ import { useState } from "react"
 import type { BehavioralPrepResponse } from "@/lib/types"
 
 interface SetupPanelProps {
-  initialResumeText: string
+  /** Controlled value — passed from useResume which hydrates from localStorage */
+  resumeText: string
   onResumeChange: (text: string) => void
   onGenerate: (data: BehavioralPrepResponse, jdText: string) => void
 }
 
-export function SetupPanel({ initialResumeText, onResumeChange, onGenerate }: SetupPanelProps) {
-  const [resumeText, setResumeText] = useState(initialResumeText)
+export function SetupPanel({ resumeText, onResumeChange, onGenerate }: SetupPanelProps) {
   const [jdMode, setJdMode] = useState<"paste" | "url">("paste")
   const [jdText, setJdText] = useState("")
   const [jdUrl, setJdUrl] = useState("")
   const [isFetchingUrl, setIsFetchingUrl] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const handleResumeChange = (text: string) => {
-    setResumeText(text)
-    onResumeChange(text)
-  }
 
   const handleFetchUrl = async () => {
     if (!jdUrl.trim()) return
@@ -107,7 +102,7 @@ export function SetupPanel({ initialResumeText, onResumeChange, onGenerate }: Se
           className="setup-textarea"
           placeholder="Paste your resume here…"
           value={resumeText}
-          onChange={e => handleResumeChange(e.target.value)}
+          onChange={e => onResumeChange(e.target.value)}
           rows={6}
         />
       </div>

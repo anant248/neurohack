@@ -58,24 +58,24 @@ export function VideoCapture({
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"
-    ctx.lineWidth = 3
+    ctx.lineWidth = 4
     ctx.beginPath()
-    ctx.roundRect(canvas.width / 2 - 60, canvas.height / 2 - 40, 120, 80, 10)
+    ctx.roundRect(canvas.width / 2 - 80, canvas.height / 2 - 55, 160, 110, 14)
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(canvas.width / 2 + 50, canvas.height / 2 - 50, 15, 0, Math.PI * 2)
+    ctx.arc(canvas.width / 2 + 68, canvas.height / 2 - 68, 20, 0, Math.PI * 2)
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(canvas.width / 2, canvas.height / 2, 25, 0, Math.PI * 2)
+    ctx.arc(canvas.width / 2, canvas.height / 2, 34, 0, Math.PI * 2)
     ctx.stroke()
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
-    ctx.font = "28px Inter, system-ui, sans-serif"
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)"
+    ctx.font = "38px Inter, system-ui, sans-serif"
     ctx.textAlign = "center"
-    ctx.fillText("Ready to begin", canvas.width / 2, canvas.height / 2 + 80)
-    ctx.font = "18px Inter, system-ui, sans-serif"
+    ctx.fillText("Ready to begin", canvas.width / 2, canvas.height / 2 + 90)
+    ctx.font = "22px Inter, system-ui, sans-serif"
     ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
-    ctx.fillText("Select a question, then hit Start Recording", canvas.width / 2, canvas.height / 2 + 120)
+    ctx.fillText("Select a question, then hit Start Recording", canvas.width / 2, canvas.height / 2 + 136)
   }, [isRecording, canvasRef])
 
   const canStart = isReady && hasQuestion && !isRecording && !isAnalyzing && !cameraError

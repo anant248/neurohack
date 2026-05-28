@@ -136,7 +136,7 @@ export default function PracticePage() {
         /* Step 1: Setup */
         <main className="setup-main">
           <SetupPanel
-            initialResumeText={resumeText}
+            resumeText={resumeText}
             onResumeChange={saveResume}
             onGenerate={handleGenerate}
           />

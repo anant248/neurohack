@@ -17,7 +17,6 @@ import { SessionNotes } from "@/components/practice/SessionNotes"
 import { HistoryModal } from "@/components/practice/HistoryModal"
 import { BehavioralBankModal } from "@/components/practice/BehavioralBankModal"
 import { AuthButton } from "@/components/auth/AuthButton"
-import { FLAGS } from "@/lib/flags"
 import type { BehavioralPrepResponse } from "@/lib/types"
 import "./styles.css"
 
@@ -102,7 +101,7 @@ export default function PracticePage() {
           <span>Interprep</span>
         </Link>
         <div className="topbar-actions">
-          {FLAGS.SUPABASE_PERSISTENCE && <AuthButton />}
+          <AuthButton />
           <button className="history-btn" onClick={() => setShowBank(true)} type="button">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path

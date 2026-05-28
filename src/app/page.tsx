@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { AuthButton } from "@/components/auth/AuthButton"
 import "./page.css"
 
 export default function RootPage() {
@@ -13,6 +14,9 @@ export default function RootPage() {
             />
           </svg>
           Interprep
+        </div>
+        <div className="topbar-actions">
+          <AuthButton />
         </div>
       </header>
 

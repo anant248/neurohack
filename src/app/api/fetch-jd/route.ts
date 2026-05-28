@@ -45,15 +45,17 @@ function extractJobText(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, " ")
     .replace(/[ \t]+/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
+    // Collapse any run of newlines (with optional surrounding spaces) to a single newline
+    .replace(/\s*\n\s*/g, "\n")
+    .replace(/\n{2,}/g, "\n")
     .trim()
 
   if (text.length <= 8000) return text
 
-  // 4. Still too long — keep only paragraphs that look job-related
-  const paragraphs = text.split(/\n\n+/)
+  // 4. Still too long — keep only lines that look job-related
+  const paragraphs = text.split(/\n/)
   const relevant = paragraphs.filter(p => p.trim().length > 20 && JOB_SECTION_RE.test(p))
-  const filtered = relevant.join("\n\n")
+  const filtered = relevant.join("\n")
 
   if (filtered.length >= 500) {
     return filtered.length > 8000 ? filtered.slice(0, 8000) + "\n[truncated]" : filtered

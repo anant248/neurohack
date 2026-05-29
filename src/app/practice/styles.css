@@ -848,6 +848,83 @@ body {
   transform: rotate(90deg);
 }
 
+/* ==================== HISTORY CLEAR ==================== */
+.history-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  color: rgba(239, 68, 68, 0.6);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.history-clear-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.history-clear-confirm-icon {
+  color: #fbbf24;
+}
+
+.history-clear-confirm-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.history-clear-confirm-sub {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.history-clear-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.history-clear-yes-btn {
+  padding: 9px 22px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+  transition: all 0.2s ease;
+}
+
+.history-clear-yes-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(239, 68, 68, 0.45);
+}
+
 /* ==================== CHART & STATS ==================== */
 .chart-container {
   height: 360px;

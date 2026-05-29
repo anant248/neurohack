@@ -90,3 +90,33 @@ export async function POST(req: NextRequest): Promise<Response> {
     return Response.json({ error: "Internal server error" }, { status: 500 })
   }
 }
+
+// ── DELETE /api/sessions ───────────────────────────────────────────────────────
+// Deletes ALL practice_sessions rows for the signed-in user.
+export async function DELETE(): Promise<Response> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return Response.json({ ok: true }) // no-op when persistence is off
+  }
+  try {
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { error } = await supabase
+      .from("practice_sessions")
+      .delete()
+      .eq("user_id", user.id)
+
+    if (error) throw error
+
+    return Response.json({ ok: true })
+  } catch (error) {
+    console.error("[DELETE /api/sessions]", error)
+    return Response.json({ error: "Internal server error" }, { status: 500 })
+  }
+}

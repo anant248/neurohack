@@ -31,7 +31,7 @@ export default function PracticePage() {
 
   const { isReady, isRecording, isAnalyzing, isAiLoading, results, cameraError, start, stop, reset } =
     useFaceLandmarker()
-  const { history, addSession } = useSessionHistory()
+  const { history, addSession, clearHistory } = useSessionHistory()
   const timer = useInterviewTimer(120)
   const { resumeText, saveResume } = useResume()
   const { session, startSession, saveNotes, endSession } = usePrepSession()
@@ -95,7 +95,12 @@ export default function PracticePage() {
 
   return (
     <div className="practice-layout">
-      <HistoryModal isOpen={showHistory} onClose={() => setShowHistory(false)} history={history} />
+      <HistoryModal
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        history={history}
+        onClearHistory={clearHistory}
+      />
       <BehavioralBankModal
         isOpen={showBank}
         onClose={() => setShowBank(false)}
@@ -118,7 +123,7 @@ export default function PracticePage() {
           <span>Interprep</span>
         </Link>
         <div className="topbar-actions">
-          <AuthButton />
+          <Link href="/technical" className="nav-link">Technical</Link>
           <button className="history-btn" onClick={() => setShowBank(true)} type="button">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path
@@ -145,6 +150,7 @@ export default function PracticePage() {
               History ({history.length})
             </button>
           )}
+          <AuthButton />
         </div>
         </div>
       </header>

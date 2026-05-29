@@ -57,7 +57,20 @@ export function VideoCapture({
     return () => clearTimeout(t)
   }, [countdown])
 
-  const handleStartWithCountdown = () => {
+  const handleStartWithCountdown = async () => {
+    // Ask for camera permission NOW (before the countdown) so the browser popup
+    // doesn't surprise the user after the 5-second delay.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      // Release tracks immediately — session.start() will re-acquire the stream.
+      // The browser remembers the permission so no second popup appears.
+      stream.getTracks().forEach(t => t.stop())
+    } catch {
+      // Permission denied or no camera — call onStart directly so
+      // useFaceLandmarker sets the cameraError state and shows the error panel.
+      onStart()
+      return
+    }
     setCountdown(5)
   }
 
@@ -152,7 +165,7 @@ export function VideoCapture({
             <span className="analysis-option-icon">👁</span>
             <span className="analysis-option-text">
               <span className="analysis-option-title">Eye Contact &amp; Expression</span>
-              <span className="analysis-option-desc">AI scores your non-verbal cues</span>
+              <span className="analysis-option-desc">AI scores only your non-verbal cues (needs camera access)</span>
             </span>
           </button>
 
@@ -164,7 +177,7 @@ export function VideoCapture({
             <span className="analysis-option-icon">🎙</span>
             <span className="analysis-option-text">
               <span className="analysis-option-title">Full Response</span>
-              <span className="analysis-option-desc">Scores your verbal answer too</span>
+              <span className="analysis-option-desc">Scores your verbal answer too (needs camera + microphone access)</span>
             </span>
           </button>
         </div>
@@ -207,7 +220,7 @@ export function VideoCapture({
         {!isRecording && !isAnalyzing && countdown === null && (
           <Button
             variant="primary"
-            onClick={handleStartWithCountdown}
+            onClick={() => { handleStartWithCountdown() }}
             disabled={!canStart}
             type="button"
             className="w-full !rounded-xl py-3"

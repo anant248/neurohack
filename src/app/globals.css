@@ -91,6 +91,24 @@ html, body {
   100% { transform: translate(5vw, -4vh); }
 }
 
+/* ── Shared nav link — plain text, hover emerald (used across all topbars) ── */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover { color: #10b981; }
+
 /* ── Site shell — flex column that keeps footer at the bottom ── */
 .site-shell {
   position: relative;

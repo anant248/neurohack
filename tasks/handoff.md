@@ -159,9 +159,31 @@ create policy "users own their prep sessions" on prep_sessions for all using (au
 create policy "users own their bank entries" on behavioral_bank_entries for all using (auth.uid() = user_id);
 ```
 
+Also run this migration for the `/api/submit-feedback` route (uses `SUPABASE_SERVICE_ROLE_KEY` directly — no RLS needed):
+
+```sql
+create table user_feedback (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('feedback', 'bug', 'feature')),
+  message text not null,
+  page_url text,
+  created_at timestamptz default now()
+);
+-- No RLS needed — inserts use the service role key and are anonymous
+```
+
 The `usePrepSession` and `useBehavioralBank` hooks call placeholder API routes
 (`/api/prep-sessions`, `/api/behavioral-bank`) that need to be built when enabling
 `NEXT_PUBLIC_FEATURE_PERSISTENCE=true`. They work fine without Supabase in local mode.
+
+## Mobile Polish Pass (completed pre-Phase 6)
+
+Five mobile issues fixed:
+1. **White safe-area bars** — `html { background: #0f0c29 }` + `viewport-fit=cover` in layout.tsx
+2. **Topbar nav overlap** — on ≤600px: hide "Interprep" text + icon-only history/bank buttons
+3. **Code editor hidden on mobile** — removed `display:none` from `.editor-panel`; `editor-wrapper` gets `height: 360px` on mobile
+4. **History stats stacking** — `.history-stats` changed from `auto-fit minmax(180px,1fr)` to `repeat(3, 1fr)`
+5. **Footer** — new `src/components/Footer.tsx` with: logo, BMC link (`buymeacoffee.com/anantgoyal`), Facebook/X/copy-link share buttons, privacy note. Added to root layout.
 
 ## Next Step
 

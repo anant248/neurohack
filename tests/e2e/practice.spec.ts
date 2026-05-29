@@ -51,7 +51,7 @@ test.describe("Practice page", () => {
   })
 
   test("renders the app logo / brand name", async ({ page }) => {
-    await expect(page.getByText("Interprep")).toBeVisible()
+    await expect(page.locator("header").getByText("Interprep")).toBeVisible()
   })
 
   test("shows setup panel on first load", async ({ page }) => {

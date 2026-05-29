@@ -20,7 +20,7 @@ test.describe("Landing page", () => {
   })
 
   test("renders the Interprep logo", async ({ page }) => {
-    await expect(page.getByText("Interprep")).toBeVisible()
+    await expect(page.locator("header").getByText("Interprep")).toBeVisible()
   })
 
   test("shows the Behavioral Practice card", async ({ page }) => {
@@ -82,7 +82,7 @@ test.describe("Technical page", () => {
   })
 
   test("renders the Interprep logo", async ({ page }) => {
-    await expect(page.getByText("Interprep")).toBeVisible()
+    await expect(page.locator("header").getByText("Interprep")).toBeVisible()
   })
 
   test("shows the question title", async ({ page }) => {
@@ -100,7 +100,7 @@ test.describe("Technical page", () => {
   })
 
   test("Interprep logo navigates to /", async ({ page }) => {
-    await page.getByRole("link", { name: "Interprep" }).click()
+    await page.locator("header").getByRole("link", { name: "Interprep" }).click()
     await expect(page).toHaveURL(/\/$/)
   })
 

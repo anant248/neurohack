@@ -375,33 +375,36 @@ export default function TechnicalPage() {
 
         {/* ── Right: editor + actions ── */}
         <section className="editor-panel">
-          <div className="editor-toolbar">
-            <button
-              className={`lang-btn${lang === "js" ? " active" : ""}`}
-              onClick={() => handleLangSwitch("js")}
-            >
-              JavaScript
-            </button>
-            <button
-              className={`lang-btn${lang === "py" ? " active" : ""}`}
-              onClick={() => handleLangSwitch("py")}
-            >
-              Python
-            </button>
+          {/* Editor body: grows to fill space, overflow contained */}
+          <div className="editor-body">
+            <div className="editor-toolbar">
+              <button
+                className={`lang-btn${lang === "js" ? " active" : ""}`}
+                onClick={() => handleLangSwitch("js")}
+              >
+                JavaScript
+              </button>
+              <button
+                className={`lang-btn${lang === "py" ? " active" : ""}`}
+                onClick={() => handleLangSwitch("py")}
+              >
+                Python
+              </button>
+            </div>
+
+            {/* CodeMirror */}
+            <div className="editor-wrapper">
+              <CodeMirror
+                value={code}
+                height="100%"
+                theme="dark"
+                extensions={extensions}
+                onChange={handleCodeChange}
+              />
+            </div>
           </div>
 
-          {/* CodeMirror */}
-          <div className="editor-wrapper">
-            <CodeMirror
-              value={code}
-              height="100%"
-              theme="dark"
-              extensions={extensions}
-              onChange={handleCodeChange}
-            />
-          </div>
-
-          {/* Action buttons row */}
+          {/* Action buttons — always visible, never scrolled away */}
           <div className="action-row">
             <button
               className={`run-btn${isRunning ? " running" : ""}`}
@@ -440,80 +443,83 @@ export default function TechnicalPage() {
             </button>
           </div>
 
-          {/* Test results panel */}
-          {(testResults || runError) && (
-            <div className={`test-results-panel${runError ? " panel--error" : allPassed ? " panel--all-pass" : ""}`} data-testid="test-results-panel">
-              {runError ? (
-                <p className="panel-error-text">{runError}</p>
-              ) : testResults ? (
-                <>
-                  <div className="test-results-header">
-                    {allPassed ? (
-                      <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M20 6L9 17l-5-5" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        All {testResults.length} tests passed
-                      </>
-                    ) : (
-                      <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <circle cx="12" cy="12" r="10" stroke="#f87171" strokeWidth="2"/>
-                          <line x1="12" y1="8" x2="12" y2="12" stroke="#f87171" strokeWidth="2" strokeLinecap="round"/>
-                          <line x1="12" y1="16" x2="12.01" y2="16" stroke="#f87171" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                        {testResults.filter((r) => r.pass).length}/{testResults.length} tests passed
-                      </>
-                    )}
-                  </div>
-                  <div className="test-cases-list">
-                    {testResults.map((r, i) => (
-                      <div key={i} className={`test-case${r.pass ? " test-case--pass" : " test-case--fail"}`}>
-                        <div className="test-case-header">
-                          <span className={`test-badge${r.pass ? " pass" : " fail"}`}>
-                            {r.pass ? "Pass" : "Fail"}
-                          </span>
-                          <span className="test-case-label">Case {i + 1}</span>
-                        </div>
-                        {!r.pass && (
-                          <div className="test-case-detail">
-                            <div className="test-case-row">
-                              <span className="test-case-key">Expected</span>
-                              <code className="test-case-val">{r.expected}</code>
-                            </div>
-                            <div className="test-case-row">
-                              <span className="test-case-key">Got</span>
-                              <code className="test-case-val test-val--fail">{r.actual}</code>
-                            </div>
+          {/* Results area — scrollable, capped height */}
+          <div className="editor-results">
+            {/* Test results panel */}
+            {(testResults || runError) && (
+              <div className={`test-results-panel${runError ? " panel--error" : allPassed ? " panel--all-pass" : ""}`} data-testid="test-results-panel">
+                {runError ? (
+                  <p className="panel-error-text">{runError}</p>
+                ) : testResults ? (
+                  <>
+                    <div className="test-results-header">
+                      {allPassed ? (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 6L9 17l-5-5" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          All {testResults.length} tests passed
+                        </>
+                      ) : (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="#f87171" strokeWidth="2"/>
+                            <line x1="12" y1="8" x2="12" y2="12" stroke="#f87171" strokeWidth="2" strokeLinecap="round"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16" stroke="#f87171" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                          {testResults.filter((r) => r.pass).length}/{testResults.length} tests passed
+                        </>
+                      )}
+                    </div>
+                    <div className="test-cases-list">
+                      {testResults.map((r, i) => (
+                        <div key={i} className={`test-case${r.pass ? " test-case--pass" : " test-case--fail"}`}>
+                          <div className="test-case-header">
+                            <span className={`test-badge${r.pass ? " pass" : " fail"}`}>
+                              {r.pass ? "Pass" : "Fail"}
+                            </span>
+                            <span className="test-case-label">Case {i + 1}</span>
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          )}
+                          {!r.pass && (
+                            <div className="test-case-detail">
+                              <div className="test-case-row">
+                                <span className="test-case-key">Expected</span>
+                                <code className="test-case-val">{r.expected}</code>
+                              </div>
+                              <div className="test-case-row">
+                                <span className="test-case-key">Got</span>
+                                <code className="test-case-val test-val--fail">{r.actual}</code>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            )}
 
-          {/* AI Review panel */}
-          {(review || reviewError) && (
-            <div className={`review-panel${reviewError ? " review-panel--error" : ""}`} data-testid="review-panel">
-              {reviewError ? (
-                <p className="review-error-text">{reviewError}</p>
-              ) : (
-                <>
-                  <div className="review-panel-header">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 11l3 3L22 4" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    AI Code Review
-                  </div>
-                  <div className="review-text">{review}</div>
-                </>
-              )}
-            </div>
-          )}
+            {/* AI Review panel */}
+            {(review || reviewError) && (
+              <div className={`review-panel${reviewError ? " review-panel--error" : ""}`} data-testid="review-panel">
+                {reviewError ? (
+                  <p className="review-error-text">{reviewError}</p>
+                ) : (
+                  <>
+                    <div className="review-panel-header">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 11l3 3L22 4" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      AI Code Review
+                    </div>
+                    <div className="review-text">{review}</div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </section>
       </main>
     </div>

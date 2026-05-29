@@ -18,6 +18,7 @@ import { HistoryModal } from "@/components/practice/HistoryModal"
 import { BehavioralBankModal } from "@/components/practice/BehavioralBankModal"
 import { AuthButton } from "@/components/auth/AuthButton"
 import type { BehavioralPrepResponse } from "@/lib/types"
+import { GENERAL_BEHAVIORAL_QUESTIONS } from "@/lib/generalQuestions"
 import "./styles.css"
 
 export default function PracticePage() {
@@ -26,6 +27,7 @@ export default function PracticePage() {
   const [selectedQuestion, setSelectedQuestion] = useState("")
   const [showHistory, setShowHistory] = useState(false)
   const [showBank, setShowBank] = useState(false)
+  const [analysisMode, setAnalysisMode] = useState<"visual" | "full" | null>(null)
 
   const { isReady, isRecording, isAnalyzing, isAiLoading, results, cameraError, start, stop, reset } =
     useFaceLandmarker()
@@ -71,9 +73,23 @@ export default function PracticePage() {
     handleReset()
   }
 
+  const handlePracticeGeneral = () => {
+    startSession({
+      companyName: "",
+      role: "",
+      companyBlurb: "",
+      companyLink: "",
+      jdText: "",
+      questions: GENERAL_BEHAVIORAL_QUESTIONS,
+    })
+    setSelectedQuestion("")
+    handleReset()
+  }
+
   const handleEndSession = () => {
     endSession()
     setSelectedQuestion("")
+    setAnalysisMode(null)
     handleReset()
   }
 
@@ -141,20 +157,31 @@ export default function PracticePage() {
             resumeText={resumeText}
             onResumeChange={saveResume}
             onGenerate={handleGenerate}
+            onPracticeGeneral={handlePracticeGeneral}
           />
         </main>
       ) : (
         /* Step 2: Active session */
         <main className="practice-main">
-          {/* Left: company card + question + notes + feedback */}
+          {/* Left: company card (tailored only) + question + notes + feedback */}
           <aside className="practice-left">
-            <CompanyCard
-              companyName={session.companyName}
-              role={session.role}
-              companyBlurb={session.companyBlurb}
-              companyLink={session.companyLink}
-              onReset={handleEndSession}
-            />
+            {session.companyName && (
+              <CompanyCard
+                companyName={session.companyName}
+                role={session.role}
+                companyBlurb={session.companyBlurb}
+                companyLink={session.companyLink}
+                onReset={handleEndSession}
+              />
+            )}
+            {!session.companyName && (
+              <div className="general-practice-banner">
+                <span>General Practice Mode</span>
+                <button type="button" className="company-reset-btn" onClick={handleEndSession}>
+                  New session
+                </button>
+              </div>
+            )}
 
             <QuestionSelector
               questions={session.questions}
@@ -214,6 +241,8 @@ export default function PracticePage() {
               timeLeft={timer.timeLeft}
               isTimerWarning={timer.isWarning}
               cameraError={cameraError}
+              analysisMode={analysisMode}
+              onAnalysisModeChange={setAnalysisMode}
             />
           </section>
         </main>

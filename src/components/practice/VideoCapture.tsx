@@ -171,12 +171,15 @@ export function VideoCapture({
 
           <button
             type="button"
-            className={`analysis-option${analysisMode === "full" ? " analysis-option--active" : ""}`}
-            onClick={() => onAnalysisModeChange("full")}
+            className="analysis-option analysis-option--disabled"
+            disabled
           >
             <span className="analysis-option-icon">🎙</span>
             <span className="analysis-option-text">
-              <span className="analysis-option-title">Full Response</span>
+              <span className="analysis-option-title">
+                Full Response
+                <span className="analysis-option-coming-soon">Coming soon</span>
+              </span>
               <span className="analysis-option-desc">Scores your verbal answer too (needs camera + microphone access)</span>
             </span>
           </button>

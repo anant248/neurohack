@@ -82,11 +82,7 @@ test.describe("Practice page", () => {
     await completeSetup(page)
     const select = page.getByRole("combobox")
     await select.selectOption({ index: 1 })
-
-    // Select an analysis mode — required since the analysis-mode toggle was added.
-    // "Eye Contact & Expression" is the first option.
-    await page.getByRole("button", { name: /Eye Contact/i }).first().click()
-
+    // "Eye Contact & Expression" mode is active by default — no manual pick needed.
     // Wait for model to finish loading — button becomes enabled
     const startBtn = page.getByRole("button", { name: /Start Recording/i })
     await expect(startBtn).toBeEnabled({ timeout: 30000 })

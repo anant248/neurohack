@@ -6,11 +6,14 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   min-height: 100dvh;
   color: #ffffff;
+}
+
+body {
   overflow: hidden; /* page never scrolls — panels handle overflow internally */
 }
 
@@ -757,7 +760,7 @@ body {
 
 .history-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -1911,5 +1914,41 @@ body {
 
   .setup-panel {
     padding: 20px 18px;
+  }
+}
+
+/* Topbar: hide labels on small screens to prevent overflow */
+@media (max-width: 600px) {
+  .practice-topbar {
+    padding: 0 14px;
+  }
+
+  /* Hide "Interprep" text — keep eye icon only */
+  .topbar-logo span {
+    display: none;
+  }
+
+  /* Icon-only history buttons */
+  .history-btn {
+    font-size: 0;
+    padding: 7px 8px;
+    gap: 0;
+  }
+
+  .history-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Stat cards: tighter padding on narrow screens */
+  .stat-card {
+    padding: 10px 8px;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
   }
 }

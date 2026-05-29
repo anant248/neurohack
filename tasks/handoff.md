@@ -149,6 +149,15 @@ None — all work committed and pushed. No in-progress changes on the branch.
 
 ---
 
+## Mobile Polish Pass (completed pre-Phase 6)
+
+Five mobile issues fixed:
+1. **White safe-area bars** — `html { background: #0f0c29 }` + `viewport-fit=cover` in layout.tsx
+2. **Topbar nav overlap** — on ≤600px: hide "Interprep" text + icon-only history/bank buttons
+3. **Code editor hidden on mobile** — removed `display:none` from `.editor-panel`; `editor-wrapper` gets `height: 360px` on mobile
+4. **History stats stacking** — `.history-stats` changed from `auto-fit minmax(180px,1fr)` to `repeat(3, 1fr)`
+5. **Footer** — new `src/components/Footer.tsx` with: logo, BMC link (`buymeacoffee.com/anantgoyal`), Facebook/X/copy-link share buttons, privacy note. Added to root layout.
+
 ## Next Step
 
 **Phase 6: Mobile Responsive Rewrite** — awaiting user input on scope.

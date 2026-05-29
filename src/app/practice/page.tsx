@@ -27,7 +27,7 @@ export default function PracticePage() {
   const [selectedQuestion, setSelectedQuestion] = useState("")
   const [showHistory, setShowHistory] = useState(false)
   const [showBank, setShowBank] = useState(false)
-  const [analysisMode, setAnalysisMode] = useState<"visual" | "full" | null>(null)
+  const [analysisMode, setAnalysisMode] = useState<"visual" | "full" | null>("visual")
 
   const { isReady, isRecording, isAnalyzing, isAiLoading, results, cameraError, start, stop, reset } =
     useFaceLandmarker()
@@ -89,7 +89,7 @@ export default function PracticePage() {
   const handleEndSession = () => {
     endSession()
     setSelectedQuestion("")
-    setAnalysisMode(null)
+    setAnalysisMode("visual")
     handleReset()
   }
 

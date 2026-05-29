@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
 
 type Provider = "google" | "github"
@@ -34,7 +35,12 @@ export function AuthForm() {
 
   return (
     <div className="auth-layout">
-      <div className="auth-card">
+      <motion.div
+        className="auth-card"
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
+      >
         {/* Logo */}
         <div className="auth-logo-badge">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -102,7 +108,7 @@ export function AuthForm() {
         <a href="/practice" className="auth-skip-link">
           Continue without signing in →
         </a>
-      </div>
+      </motion.div>
     </div>
   )
 }

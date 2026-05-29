@@ -1,33 +1,109 @@
 @import "tailwindcss";
 
+/* ── Design tokens ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: #10b981;
+  --accent-bright: #34d399;
+  --accent-glow: rgba(16, 185, 129, 0.35);
+  --bg: #000000;
+  --card: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-faint: rgba(255, 255, 255, 0.28);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* html + body — black base; fills iOS safe-area bars */
+html, body {
+  background: #000;
+  color: #fff;
+  font-family: 'Inter', var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100dvh;
 }
 
-/* html background fills iOS safe-area insets — prevents white bars on notched phones */
-html {
-  background: #0f0c29;
+/* ── Aurora background — fixed layer behind everything ── */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.aurora-bg::before,
+.aurora-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+}
+
+.aurora-bg::before {
+  width: 70vw;
+  height: 60vh;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(ellipse, #3b82f6 0%, transparent 70%);
+  animation: aurora-drift-1 14s ease-in-out infinite alternate;
+}
+
+.aurora-bg::after {
+  width: 60vw;
+  height: 55vh;
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(ellipse, #10b981 0%, transparent 70%);
+  animation: aurora-drift-2 11s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes aurora-drift-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(8vw, 6vh) scale(1.1); }
+}
+
+@keyframes aurora-drift-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-7vw, -5vh) scale(1.12); }
+}
+
+/* Subtle mid-screen purple blob */
+.aurora-bg-mid {
+  position: absolute;
+  width: 50vw;
+  height: 40vh;
+  top: 30%;
+  left: 25%;
+  background: radial-gradient(ellipse, #7c3aed 0%, transparent 70%);
+  filter: blur(100px);
+  opacity: 0.1;
+  animation: aurora-drift-3 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes aurora-drift-3 {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(5vw, -4vh); }
+}
+
+/* ── Site shell — flex column that keeps footer at the bottom ── */
+.site-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.site-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ==================== SHARED AUTH TOPBAR STYLES ==================== */
@@ -58,7 +134,7 @@ body {
   background: rgba(102, 126, 234, 0.18);
   border: 1.5px solid rgba(102, 126, 234, 0.4);
   border-radius: 10px;
-  color: #a5b4fc;
+  color: #6ee7b7;
   font-size: 0.83rem;
   font-weight: 600;
   font-family: 'Inter', system-ui, sans-serif;
@@ -82,7 +158,7 @@ body {
   height: 32px;
   border-radius: 50%;
   border: 2px solid rgba(102, 126, 234, 0.5);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   cursor: pointer;
   display: flex;
@@ -136,10 +212,10 @@ body {
   align-items: center;
   gap: 8px;
   padding: 9px 16px 9px 12px;
-  background: rgba(30, 27, 58, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 10, 14, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.85);
   font-size: 0.83rem;
@@ -180,7 +256,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   color: white;
   display: flex;
@@ -213,8 +289,8 @@ body {
 
 .fb-modal {
   width: min(92vw, 360px);
-  background: linear-gradient(135deg, rgba(15, 12, 41, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 12, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   padding: 20px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
@@ -253,12 +329,13 @@ body {
   justify-content: center;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.55);
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
 }
 
 .fb-close:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
   color: white;
+  transform: rotate(90deg);
 }
 
 .fb-close:disabled {
@@ -292,7 +369,7 @@ body {
 .fb-type-chip--active {
   background: rgba(102, 126, 234, 0.2);
   border-color: rgba(102, 126, 234, 0.55);
-  color: #a5b4fc;
+  color: #6ee7b7;
 }
 
 .fb-type-chip:hover:not(.fb-type-chip--active) {
@@ -316,7 +393,7 @@ body {
 
 .fb-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
@@ -339,7 +416,7 @@ body {
 
 .fb-submit {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   border-radius: 10px;
   color: white;
@@ -395,124 +472,107 @@ body {
 
 /* ==================== FOOTER ==================== */
 .app-footer {
-  padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.25);
+  padding: 12px 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(12px);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  flex-shrink: 0;
 }
 
 .footer-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .footer-left {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 16px;
 }
 
 .footer-logo {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  width: fit-content;
+  color: rgba(255,255,255,0.6);
+  transition: color 0.2s ease;
 }
 
+.footer-logo:hover { color: white; }
+
 .footer-logo svg {
-  color: #667eea;
-  -webkit-text-fill-color: initial;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .footer-privacy {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.35);
-  line-height: 1.45;
-  max-width: 340px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1.4;
 }
 
 .footer-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
+/* Buy Me a Coffee — icon only, very subtle */
 .footer-bmc {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 213, 79, 0.1);
-  border: 1px solid rgba(255, 213, 79, 0.25);
-  border-radius: 20px;
-  color: #ffd54f;
-  font-size: 0.73rem;
-  font-weight: 600;
-  font-family: 'Inter', system-ui, sans-serif;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.3);
   text-decoration: none;
   transition: all 0.2s ease;
-  white-space: nowrap;
 }
 
 .footer-bmc:hover {
-  background: rgba(255, 213, 79, 0.2);
-  border-color: rgba(255, 213, 79, 0.45);
+  border-color: rgba(255, 213, 79, 0.4);
+  color: #ffd54f;
 }
 
 .footer-share-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .footer-share-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255,255,255,0.8);
 }
 
 .footer-share-btn--copied {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
+  border-color: rgba(16, 185, 129, 0.4);
   color: #34d399;
 }
 
-@media (max-width: 480px) {
-  .footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .footer-right {
-    align-self: flex-end;
-  }
-
-  .footer-bmc span {
-    display: none;
-  }
+@media (max-width: 600px) {
+  .app-footer { padding: 12px 16px; }
+  .footer-privacy { display: none; }
+  .footer-inner { flex-direction: row; }
 }

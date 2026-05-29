@@ -1,87 +1,85 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+/* body: NO flex centering here — that was causing the footer to appear sideways.
+   Centering is handled inside .auth-layout instead. */
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-  min-height: 100dvh;
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* ==================== LAYOUT ==================== */
+/* ── Layout: fills available space from site-content, centers the card ── */
 .auth-layout {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100dvh;
-  padding: 24px;
+  flex: 1;
+  min-height: calc(100dvh - 60px); /* 60px = footer height */
+  padding: 32px 24px;
 }
 
+/* ── Card ── */
 .auth-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 40px 36px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 44px 40px;
   width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: fadeUp 0.5s ease-out;
+  gap: 22px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 
-/* ==================== LOGO ==================== */
+/* ── Logo badge ── */
 .auth-logo-badge {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 20px;
-  color: white;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.45);
+  color: #10b981;
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.2);
 }
 
-/* ==================== TEXT ==================== */
+/* ── Text ── */
 .auth-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: white;
   text-align: center;
+  letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.45);
   text-align: center;
   line-height: 1.5;
-  margin-top: -8px;
+  margin-top: -10px;
 }
 
 .auth-error {
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   color: #f87171;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
   padding: 10px 14px;
   width: 100%;
   text-align: center;
 }
 
-/* ==================== PROVIDERS ==================== */
+/* ── Provider buttons ── */
 .auth-providers {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -92,57 +90,57 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 13px 20px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
   color: white;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
+  letter-spacing: -0.01em;
 }
 
 .auth-provider-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
 }
 
 .auth-provider-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
+/* ── Spinner ── */
 .auth-spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
 
-/* ==================== SKIP LINK ==================== */
+/* ── Skip link ── */
 .auth-skip-link {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .auth-skip-link:hover {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* ==================== ANIMATIONS ==================== */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  color: rgba(255, 255, 255, 0.6);
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .auth-card { padding: 32px 24px; border-radius: 20px; }
 }

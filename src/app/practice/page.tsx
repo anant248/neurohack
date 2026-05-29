@@ -91,6 +91,7 @@ export default function PracticePage() {
 
       {/* ── Top bar ── */}
       <header className="practice-topbar">
+        <div className="topbar-inner">
         <Link href="/" className="topbar-logo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
@@ -128,6 +129,7 @@ export default function PracticePage() {
               History ({history.length})
             </button>
           )}
+        </div>
         </div>
       </header>
 

@@ -1329,7 +1329,7 @@ body {
 }
 
 .analysis-option--disabled {
-  opacity: 0.45;
+  opacity: 0.70;
   cursor: not-allowed !important;
   pointer-events: none;
 }

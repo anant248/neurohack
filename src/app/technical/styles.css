@@ -75,6 +75,7 @@ body {
 .technical-main {
   display: grid;
   grid-template-columns: 5fr 7fr;
+  grid-template-rows: 1fr;
   gap: 16px;
   padding: 16px 20px;
   flex: 1;

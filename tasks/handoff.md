@@ -1,9 +1,8 @@
 # Session Handoff — Interprep Revamp
 
-**Branch**: `claude/stupefied-swartz-cf9ca6`  
-**Last commit**: `19662db` — chore: remove Account/Settings from auth dropdown  
-**CI status**: ✅ type-check clean, 105/105 unit tests passing, lint clean  
-**Vercel**: Deployed and Ready on preview URL
+**Branch**: `revamp`  
+**CI status**: ✅ type-check clean, lint clean  
+**Vercel**: Deployed on `neurohack25.vercel.app` (production) — `revamp` branch auto-deploys
 
 ---
 
@@ -12,13 +11,20 @@
 Evolve a hackathon face-tracking interview-prep app into a full interview prep platform.
 Full plan lives in `tasks/todo.md`.
 
-**Phases 1–5 complete (including post-launch fixes).**
+**Phases 1–7 complete.**
 
-Remaining:
-- **Phase 6**: Mobile responsive rewrite — make the app clean and fully functional on phones/tablets. Scope (which features are included/excluded on mobile) to be defined by the user before implementation.
-- **Phase 7**: Full frontend UI rewrite — replace the current generic purple-gradient aesthetic with a premium, minimalist feel using Framer Motion + shadcn/ui. Color scheme, typography, and animation references to be provided by the user before implementation.
+Phase 6 (mobile responsive) + Phase 7 (full UI rewrite) merged from `ui-changes` branch → `revamp` on 2026-05-30.
+Phase 7 design: aurora background, emerald (#10b981) accent, premium glass cards, Inter font.
+
+Next features planned (see bottom of this file for full spec):
+1. "Practice without tailored questions" button on setup — general behavioural question bank
+2. Nav bar modernisation (plain text buttons, hover → emerald, slightly taller bar)
+3. 5-second countdown overlay before recording starts
+4. FeedbackBubble repositioned above footer (no overlap)
+5. Analysis-mode toggle above video frame (Eye Contact & Expression only vs Full Response scoring)
 
 Optional / later:
+- Full audio response scoring implementation (Phase 5.2)
 - User dashboard (streaks, score history), problem picker for `/technical`, onboarding, PWA
 
 ---
@@ -108,12 +114,12 @@ CREATE POLICY "users own their bank entries"
   ON behavioral_bank_entries FOR ALL USING (auth.uid() = user_id);
 ```
 
-### Design tokens (consistent across all pages)
-- Background: `linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)`
-- Font: Inter
+### Design tokens (Phase 7 — current)
+- Background: aurora-bg (animated, defined in globals.css) over `#060611` base
+- Font: Inter (page CSS) + Geist Sans (root layout)
 - Glass cards: `rgba(255,255,255,0.05)` + `backdrop-filter: blur(12px)`
-- Primary accent: `#667eea` / `#764ba2`
-- Technical accent: `#10b981` / `#059669`
+- Primary accent: `#10b981` / `#059669` (emerald — all interactive elements)
+- Landing hero: rotating word + floating animated shapes + frosted-glass mode cards
 
 ---
 
@@ -158,35 +164,39 @@ Five mobile issues fixed:
 4. **History stats stacking** — `.history-stats` changed from `auto-fit minmax(180px,1fr)` to `repeat(3, 1fr)`
 5. **Footer** — new `src/components/Footer.tsx` with: logo, BMC link (`buymeacoffee.com/anantgoyal`), Facebook/X/copy-link share buttons, privacy note. Added to root layout.
 
-## Next Step
+## Next Features (planned, not yet implemented)
 
-**Phase 6: Mobile Responsive Rewrite** — awaiting user input on scope.
+### 1 — Practice without tailored questions
+- Button on setup page (below "Generate Tailored Questions"): `Practice without tailored questions →`
+- Ghost/outline style matching "Continue without signing in"
+- Skips company research entirely; goes straight to session with a hardcoded general behavioural question bank
+- Company card is hidden in this mode; QuestionSelector uses the general bank
 
-Before starting, the user will define:
-1. Which pages are in scope for mobile (all three? landing + practice only?)
-2. Which features are excluded on small screens (webcam/face tracking? code editor?)
-3. Preferred mobile navigation pattern (bottom tabs? hamburger drawer?)
+### 2 — Nav bar modernisation
+- Remove bordered/bg buttons for Sign In, Story Bank, History
+- Replace with plain white text, hover → `#10b981` (emerald), slight underline on hover
+- Navbar height: increase to 72px
+- Landing page tagline + feature bullets: bump font size ~10-15% for readability
 
-Once scope is locked, the implementation approach is:
-- CSS media queries + flexbox/grid reflow (no separate mobile codebase)
-- Likely disable face tracking on mobile (MediaPipe is heavy; camera permission UX is worse)
-- Practice page collapses from 2-column grid to single-column stack
-- Technical page may be read-only (question + AI review) without the editor on mobile
+### 3 — 5-second countdown before recording
+- After user clicks "Start Recording", show a fullscreen-overlay countdown (5 → 4 → 3 → 2 → 1 → GO)
+- Big numbers flashed on the video frame area
+- Recording doesn't start until countdown completes
+- User can cancel during countdown
 
-**Phase 7: UI Rewrite** — awaiting user's color scheme, font choices, and animation references.
+### 4 — FeedbackBubble above footer
+- Currently overlaps footer on mobile
+- Fix: add `bottom: 80px` (or whatever footer height is) instead of `bottom: 20px`
 
-The user wants: premium, minimalist feel. Tech stack: Framer Motion + shadcn/ui.
-Layout positions stay largely the same — this is a pure visual layer swap.
+### 5 — Analysis-mode toggle (above video frame)
+- Two-option toggle: "Eye Contact & Expression" | "Full Response"
+- Must be selected before Start Recording is enabled (alongside question selection)
+- Option A (current): eye contact + expression scoring only
+- Option B (future): audio + response scoring — for now just wire up the toggle UI; backend not implemented
 
-**Verification for any phase**:
+**Verification**:
 ```bash
 npm run type-check   # zero errors
 npm test             # 105+ tests pass
 npm run lint         # clean
-```
-
-Open a new worktree for each phase:
-```bash
-# from repo root on revamp branch:
-git worktree add .claude/worktrees/<name> -b claude/<name>
 ```

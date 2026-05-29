@@ -1977,26 +1977,39 @@ body {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
-  body {
-    overflow: auto; /* allow scroll on mobile */
-  }
+  /* Unlock the 100dvh cage so the page can scroll past the viewport */
+  body { overflow: auto; height: auto; min-height: 100dvh; }
+  .site-shell { height: auto; min-height: 100dvh; }
+  .site-content { overflow: visible; }
 
   .practice-layout {
     height: auto;
-    overflow: auto;
+    overflow: visible;
+    flex: none;
+    min-height: 0;
   }
 
   .practice-main {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;   /* both panels stack at natural height */
     overflow: visible;
+    height: auto;
+    flex: none;
+    min-height: 0;
   }
 
+  /* Left panel: natural height, no clipping */
   .practice-left {
     overflow: visible;
+    height: auto;
   }
 
+  /* Right panel: natural height, video fills its width */
   .practice-right {
+    height: auto;
     min-height: 0;
+    /* keep centering so video doesn't stretch full-width */
+    align-items: stretch;
   }
 
   .video-panel {
@@ -2007,8 +2020,15 @@ body {
     flex: none;
   }
 
+  /* Setup panel: tighter padding and allow full scroll */
   .setup-panel {
-    padding: 20px 18px;
+    padding: 20px 16px;
+    max-height: none;
+  }
+
+  /* Topbar inner: tighten horizontal padding on phones */
+  .practice-topbar .topbar-inner {
+    padding: 0 16px;
   }
 }
 

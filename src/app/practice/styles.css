@@ -12,7 +12,19 @@ html, body {
 }
 
 body {
+  height: 100dvh;
   overflow: hidden; /* page never scrolls — panels handle overflow internally */
+}
+
+/* Bound the site-shell + site-content flex chain so the layout panels
+   get a real height and overflow:hidden actually clips at the viewport */
+.site-shell {
+  height: 100dvh;
+  min-height: unset;
+}
+
+.site-content {
+  overflow: hidden;
 }
 
 /* ==================== FULL-PAGE LAYOUT ==================== */

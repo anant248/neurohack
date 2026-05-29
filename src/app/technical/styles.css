@@ -8,12 +8,22 @@
 
 html, body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-  min-height: 100dvh;
   color: #ffffff;
 }
 
 body {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Bound the site-shell + site-content flex chain so the layout panels
+   get a real height and overflow:hidden actually clips at the viewport */
+.site-shell {
+  height: 100dvh;
+  min-height: unset;
+}
+
+.site-content {
   overflow: hidden;
 }
 
@@ -21,7 +31,8 @@ body {
 .technical-layout {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -29,13 +40,21 @@ body {
 .technical-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  height: 52px;
+  height: 64px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+}
+
+.technical-topbar .topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
 }
 
 .topbar-logo {
@@ -47,7 +66,7 @@ body {
   color: white;
   text-decoration: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -60,7 +79,7 @@ body {
 
 .topbar-logo svg {
   flex-shrink: 0;
-  color: #667eea;
+  color: #10b981;
   -webkit-text-fill-color: initial;
 }
 
@@ -68,6 +87,7 @@ body {
 .technical-main {
   display: grid;
   grid-template-columns: 5fr 7fr;
+  grid-template-rows: 1fr;
   gap: 16px;
   padding: 16px 20px;
   flex: 1;
@@ -182,11 +202,11 @@ body {
 
 .topic-tag {
   padding: 3px 9px;
-  background: rgba(102, 126, 234, 0.12);
-  border: 1px solid rgba(102, 126, 234, 0.22);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.22);
   border-radius: 10px;
   font-size: 0.73rem;
-  color: #a5b4fc;
+  color: #6ee7b7;
   font-weight: 500;
 }
 
@@ -229,7 +249,7 @@ body {
 }
 
 .question-html code {
-  background: rgba(102, 126, 234, 0.15);
+  background: rgba(16, 185, 129, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Fira Code', 'Cascadia Code', monospace;
@@ -286,14 +306,37 @@ body {
 .editor-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  height: 100%;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
+  gap: 0;
 }
 
-.editor-panel::-webkit-scrollbar { width: 4px; }
-.editor-panel::-webkit-scrollbar-track { background: transparent; }
-.editor-panel::-webkit-scrollbar-thumb {
+/* Editor + toolbar: flex:1 fills remaining space, editor scroll handled by CodeMirror internally */
+.editor-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  padding-bottom: 12px;
+}
+
+/* Results area: scrolls if test/review panels exceed max-height */
+.editor-results {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 300px;
+  padding-bottom: 8px;
+}
+
+.editor-results::-webkit-scrollbar { width: 4px; }
+.editor-results::-webkit-scrollbar-track { background: transparent; }
+.editor-results::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
@@ -319,9 +362,9 @@ body {
 }
 
 .lang-btn.active {
-  background: rgba(102, 126, 234, 0.2);
-  border-color: rgba(102, 126, 234, 0.45);
-  color: #a5b4fc;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
 }
 
 .lang-btn:hover:not(.active) {
@@ -352,6 +395,7 @@ body {
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+  padding-bottom: 12px;
 }
 
 .run-btn,
@@ -383,14 +427,14 @@ body {
 }
 
 .review-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
 
 .review-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
 
 .run-btn:disabled,
@@ -549,15 +593,6 @@ body {
   flex-direction: column;
   gap: 10px;
   animation: fadeInUp 0.35s ease-out;
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.review-panel::-webkit-scrollbar { width: 4px; }
-.review-panel::-webkit-scrollbar-track { background: transparent; }
-.review-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
 }
 
 .review-panel--error {

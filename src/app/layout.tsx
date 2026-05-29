@@ -33,8 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-        <Footer />
+        {/* Aurora layer — fixed, sits behind all page content */}
+        <div className="aurora-bg" aria-hidden="true" />
+        {/* Site shell — flex column so footer is always at the bottom */}
+        <div className="site-shell">
+          <div className="site-content">{children}</div>
+          <Footer />
+        </div>
         <FeedbackBubble />
       </body>
     </html>

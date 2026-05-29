@@ -208,6 +208,34 @@ wrap the call in a feature flag so it's never fired in production.
 
 ---
 
+## L-016 — `body { overflow: hidden }` requires a bounded height in the ancestor flex chain
+
+**What happened**: After the Phase 7 UI revamp added a `site-shell` wrapper
+(`min-height: 100dvh`, flex column) around all pages, the `/technical` and
+`/practice` pages stopped showing their bottom content (buttons, problem end).
+Both page CSS files set `body { overflow: hidden }` so that panels handle
+scrolling internally — but `min-height` on `site-shell` is unbounded, so the
+flex chain never got a real height cap. Page layouts with `flex: 1; overflow: hidden`
+clipped content at the viewport edge with no way to scroll to it.
+
+**Rule**: `overflow: hidden` on a flex child only clips correctly when every
+ancestor in the chain has an explicit `height` (not just `min-height`). When
+adding a full-page wrapper (`site-shell`, app shell, etc.) around pages that
+use "no-scroll" layouts:
+1. The wrapper must use `height: 100dvh` (not `min-height: 100dvh`) — or the
+   page-level CSS must override it to `height: 100dvh; min-height: unset`.
+2. `overflow: hidden` must be set on `site-content` (or equivalent) so the
+   flex container itself clips at the viewport.
+
+Fix applied in `technical/styles.css` and `practice/styles.css`:
+```css
+body { height: 100dvh; overflow: hidden; }
+.site-shell { height: 100dvh; min-height: unset; }
+.site-content { overflow: hidden; }
+```
+
+---
+
 ## L-015 — Client-generated UUID must be sent to the server when subsequent calls reference it
 
 **What happened**: `usePrepSession` generated a local UUID (`newSession.id`) but

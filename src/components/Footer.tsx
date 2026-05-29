@@ -87,7 +87,6 @@ export function Footer() {
                 strokeLinecap="round"
               />
             </svg>
-            Buy me a coffee
           </a>
 
           <button

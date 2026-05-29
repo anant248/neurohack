@@ -128,7 +128,7 @@ export function VideoCapture({
 
       <div className="video-controls">
         {!isRecording && !isAnalyzing && (
-          <Button variant="primary" onClick={onStart} disabled={!canStart} type="button">
+          <Button variant="primary" onClick={onStart} disabled={!canStart} type="button" className="w-full !rounded-xl py-3">
             {!isReady ? (
               <>
                 <span className="spinner" />
@@ -147,7 +147,7 @@ export function VideoCapture({
         )}
 
         {isRecording && (
-          <Button variant="stop" onClick={onStop} type="button">
+          <Button variant="stop" onClick={onStop} type="button" className="w-full !rounded-xl py-3 stop-recording-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
             </svg>
@@ -157,7 +157,7 @@ export function VideoCapture({
 
         {isAnalyzing && (
           <div className="analyzing-inline">
-            <div className="spinner" style={{ borderTopColor: "#667eea" }} />
+            <div className="spinner" style={{ borderTopColor: "#10b981" }} />
             <span>Analyzing your performance…</span>
           </div>
         )}

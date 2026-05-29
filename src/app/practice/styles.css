@@ -90,6 +90,7 @@ body {
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  height: 100%;      /* fills the grid row so overflow-y:auto activates */
   overflow-y: auto;
   padding-right: 4px; /* space for scrollbar */
 }
@@ -423,6 +424,19 @@ body {
 
 .video-controls {
   flex-shrink: 0;
+  width: 100%;
+}
+
+/* Ensure recording buttons always fill the controls area */
+.video-controls > button {
+  width: 100% !important;
+  border-radius: 12px !important;
+  padding: 13px 20px !important;
+  font-size: 0.95rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Inline analyzing state inside controls area */
@@ -841,10 +855,10 @@ body {
 .setup-main {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
-  overflow: hidden;
+  padding: 24px 20px;
+  overflow-y: auto;
 }
 
 /* ==================== SETUP PANEL ==================== */
@@ -1468,12 +1482,13 @@ body {
   justify-content: center;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .modal-close-btn:hover {
   background: rgba(255, 255, 255, 0.14);
   color: white;
+  transform: rotate(90deg);
 }
 
 .bank-modal-body {

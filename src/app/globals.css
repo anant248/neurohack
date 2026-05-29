@@ -329,12 +329,13 @@ html, body {
   justify-content: center;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.55);
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
 }
 
 .fb-close:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
   color: white;
+  transform: rotate(90deg);
 }
 
 .fb-close:disabled {

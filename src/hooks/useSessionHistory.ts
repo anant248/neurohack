@@ -70,5 +70,17 @@ export function useSessionHistory() {
     }
   }, [])
 
-  return { history, addSession }
+  const clearHistory = useCallback(() => {
+    // Optimistic local clear
+    setHistory([])
+
+    // Delete from Supabase when flag is on
+    if (FLAGS.SUPABASE_PERSISTENCE) {
+      fetch("/api/sessions", { method: "DELETE" }).catch(err =>
+        console.error("[useSessionHistory] Failed to clear sessions:", err),
+      )
+    }
+  }, [])
+
+  return { history, addSession, clearHistory }
 }

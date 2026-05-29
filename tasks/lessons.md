@@ -208,6 +208,28 @@ wrap the call in a feature flag so it's never fired in production.
 
 ---
 
+## L-017 — Page-level `site-shell { height: 100dvh }` must be overridden in mobile media queries
+
+**What happened**: Both `/technical` and `/practice` set `.site-shell { height: 100dvh }` via their own
+CSS files to bound the desktop "no-scroll" layout. The mobile `@media (max-width: 900px)` blocks reset
+`body { overflow: auto }` but never reset `.site-shell { height: 100dvh }` or `.site-content { overflow: hidden }`.
+Result: even though `body` could scroll, the site-shell acted as a 100dvh cage — content below the fold
+was clipped and invisible. Question Selector, Session Notes, and question-body examples were all hidden.
+
+**Rule**: Whenever a page-level CSS file overrides `.site-shell` or `.site-content` for a desktop
+"fixed viewport" layout, the mobile media query MUST undo those overrides:
+```css
+@media (max-width: 900px) {
+  body          { overflow: auto; height: auto; min-height: 100dvh; }
+  .site-shell   { height: auto;   min-height: 100dvh; }
+  .site-content { overflow: visible; }
+}
+```
+Also reset `grid-template-rows: auto` (not `1fr`) and `flex: none` on all layout grids/flex
+containers that previously used `flex: 1; overflow: hidden` — on mobile they must flow naturally.
+
+---
+
 ## L-016 — `body { overflow: hidden }` requires a bounded height in the ancestor flex chain
 
 **What happened**: After the Phase 7 UI revamp added a `site-shell` wrapper

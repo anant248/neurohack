@@ -306,6 +306,7 @@ export default function TechnicalPage() {
             Interprep
           </Link>
           <div className="topbar-actions">
+            <Link href="/practice" className="nav-link">Behavioural</Link>
             <AuthButton />
           </div>
         </div>

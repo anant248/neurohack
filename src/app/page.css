@@ -23,7 +23,7 @@
 /* ── Top bar ── */
 .landing-topbar {
   flex-shrink: 0;
-  height: 64px;
+  height: 72px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(20px);
@@ -158,8 +158,8 @@
 
 /* Subtitle */
 .hero-subtitle {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.7;
   max-width: 520px;
   font-weight: 400;
@@ -238,15 +238,15 @@
 }
 
 .mode-card-title {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: white;
   margin-bottom: 2px;
 }
 
 .mode-card-desc {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
   line-height: 1.4;
 }
 

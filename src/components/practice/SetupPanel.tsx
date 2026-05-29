@@ -8,9 +8,11 @@ interface SetupPanelProps {
   resumeText: string
   onResumeChange: (text: string) => void
   onGenerate: (data: BehavioralPrepResponse, jdText: string) => void
+  /** Skip tailoring entirely — jumps straight to session with general questions */
+  onPracticeGeneral: () => void
 }
 
-export function SetupPanel({ resumeText, onResumeChange, onGenerate }: SetupPanelProps) {
+export function SetupPanel({ resumeText, onResumeChange, onGenerate, onPracticeGeneral }: SetupPanelProps) {
   const [jdMode, setJdMode] = useState<"paste" | "url">("paste")
   const [jdText, setJdText] = useState("")
   const [jdUrl, setJdUrl] = useState("")
@@ -195,6 +197,15 @@ export function SetupPanel({ resumeText, onResumeChange, onGenerate }: SetupPane
             Generate Tailored Questions
           </>
         )}
+      </button>
+
+      <button
+        type="button"
+        className="skip-tailoring-btn"
+        onClick={onPracticeGeneral}
+        disabled={isGenerating}
+      >
+        Practice without tailored questions →
       </button>
     </div>
   )

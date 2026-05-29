@@ -19,7 +19,9 @@ body {
 .practice-layout {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  /* flex:1 fills site-content so footer is visible below at the bottom */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -710,8 +712,8 @@ body {
 }
 
 .modal-content {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.97) 0%, rgba(22, 33, 62, 0.97) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 12, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 28px;
   max-width: 800px;
@@ -1417,8 +1419,8 @@ body {
 
 /* ==================== BEHAVIORAL BANK MODAL ==================== */
 .modal-panel {
-  background: linear-gradient(135deg, rgba(15, 12, 41, 0.97) 0%, rgba(22, 33, 62, 0.97) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 12, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 0;
   max-height: 90vh;

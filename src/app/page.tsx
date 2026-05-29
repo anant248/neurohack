@@ -59,7 +59,9 @@ function RotatingWord() {
   }, [idx])
 
   return (
+    /* hidden "Crush" sets the width; rotating spans overlay it */
     <span className="rotating-word-wrap">
+      <span className="rotating-word-sizer" aria-hidden="true">Crush</span>
       {WORDS.map((word, i) => (
         <motion.span
           key={word}
@@ -86,14 +88,6 @@ const fadeUp = {
 export default function RootPage() {
   return (
     <div className="landing-layout">
-      {/* Floating shapes */}
-      <div className="shapes-layer" aria-hidden="true">
-        <ElegantShape delay={0.2} width={560} height={110} rotate={12}  color="rgba(16,185,129,0.1)"  className="left-[-6%] top-[18%]" />
-        <ElegantShape delay={0.4} width={420} height={90}  rotate={-14} color="rgba(59,130,246,0.1)"  className="right-[-4%] top-[65%]" />
-        <ElegantShape delay={0.35} width={260} height={65} rotate={-7}  color="rgba(124,58,237,0.1)"  className="left-[8%] bottom-[12%]" />
-        <ElegantShape delay={0.55} width={180} height={50} rotate={20}  color="rgba(245,158,11,0.08)" className="right-[18%] top-[12%]" />
-        <ElegantShape delay={0.65} width={130} height={38} rotate={-22} color="rgba(16,185,129,0.12)" className="left-[24%] top-[8%]" />
-      </div>
 
       {/* ── Top bar ── */}
       <header className="landing-topbar">

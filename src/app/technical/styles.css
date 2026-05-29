@@ -8,8 +8,6 @@
 
 html, body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: transparent;
-  min-height: 100dvh;
   color: #ffffff;
 }
 
@@ -21,7 +19,8 @@ body {
 .technical-layout {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 

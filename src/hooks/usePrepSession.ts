@@ -1,27 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import type { PrepSession, PrepHistoryEntry, TailoredQuestion } from "@/lib/types"
+import type { PrepSession, TailoredQuestion } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
-
-const PREP_HISTORY_KEY = "interprep-prep-history"
-
-function appendPrepHistory(session: PrepSession) {
-  try {
-    const raw = localStorage.getItem(PREP_HISTORY_KEY)
-    const existing: Array<PrepHistoryEntry & { createdAt: string }> = raw ? JSON.parse(raw) : []
-    const entry: PrepHistoryEntry = {
-      id: session.id,
-      companyName: session.companyName,
-      role: session.role,
-      questionCount: session.questions.length,
-      createdAt: session.createdAt,
-    }
-    localStorage.setItem(PREP_HISTORY_KEY, JSON.stringify([entry, ...existing].slice(0, 100)))
-  } catch {
-    // ignore
-  }
-}
 
 function makeId() {
   return crypto.randomUUID()
@@ -58,7 +39,6 @@ export function usePrepSession() {
         createdAt: new Date(),
       }
       setSession(newSession)
-      appendPrepHistory(newSession)
 
       // Persist metadata to Supabase when flag is on.
       // We send the locally-generated UUID so the notes PATCH can reference it.

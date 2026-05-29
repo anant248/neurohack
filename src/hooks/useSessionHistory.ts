@@ -10,42 +10,18 @@ export interface AddSessionInput {
   expressionScore: number
 }
 
-const SCORES_KEY = "interprep-session-scores"
-
-function loadLocalScores(): SessionScore[] {
-  try {
-    const raw = localStorage.getItem(SCORES_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as Array<Omit<SessionScore, "timestamp"> & { timestamp: string }>
-    return parsed.map((s, i) => ({ ...s, attempt: i + 1, timestamp: new Date(s.timestamp) }))
-  } catch {
-    return []
-  }
-}
-
-function appendLocalScore(score: SessionScore) {
-  try {
-    const existing = loadLocalScores()
-    const next = [...existing, score].slice(-200)
-    localStorage.setItem(SCORES_KEY, JSON.stringify(next))
-  } catch {
-    // ignore
-  }
-}
-
 /**
  * Manages the user's session history.
- * - Always persists to localStorage for the Phase 6 dashboard.
- * - When SUPABASE_PERSISTENCE flag is on, also syncs with Supabase.
+ * - Flag OFF → pure in-memory state (Phase 0 behaviour, no auth required)
+ * - Flag ON  → loads from Supabase on mount; persists each new session via POST /api/sessions
+ *
+ * The returned interface is identical in both modes so calling components never change.
  */
 export function useSessionHistory() {
   const [history, setHistory] = useState<SessionScore[]>([])
 
+  // ── Load persisted history when flag is on ──
   useEffect(() => {
-    // Load local scores first (dashboard reads from the same localStorage key)
-    const local = loadLocalScores()
-    if (local.length > 0) setHistory(local)
-
     if (!FLAGS.SUPABASE_PERSISTENCE) return
 
     fetch("/api/sessions")
@@ -69,17 +45,18 @@ export function useSessionHistory() {
   }, [])
 
   const addSession = useCallback((input: AddSessionInput) => {
-    setHistory(prev => {
-      const next: SessionScore = {
+    // Optimistic local update — always happens immediately
+    setHistory(prev => [
+      ...prev,
+      {
         attempt: prev.length + 1,
         eyeContactScore: input.eyeContactScore,
         expressionScore: input.expressionScore,
         timestamp: new Date(),
-      }
-      appendLocalScore(next)
-      return [...prev, next]
-    })
+      },
+    ])
 
+    // Persist to Supabase when flag is on
     if (FLAGS.SUPABASE_PERSISTENCE) {
       fetch("/api/sessions", {
         method: "POST",

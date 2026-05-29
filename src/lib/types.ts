@@ -50,16 +50,6 @@ export interface PrepSession {
   createdAt: Date
 }
 
-// ── Phase 6: Dashboard ────────────────────────────────────────────────────────
-
-export interface PrepHistoryEntry {
-  id: string
-  companyName: string
-  role: string
-  questionCount: number
-  createdAt: Date
-}
-
 export interface BehavioralBankEntry {
   id: string
   title: string

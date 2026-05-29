@@ -285,6 +285,33 @@ body {
   animation: fadeInUp 0.4s ease-out;
 }
 
+/* "Try Another Question" — design-system outline button, immune to Tailwind
+   specificity issues caused by the page-level CSS reset */
+.results-reset-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 32px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.results-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 .results-header {
   display: flex;
   align-items: center;

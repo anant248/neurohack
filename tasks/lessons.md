@@ -125,3 +125,98 @@ Vercel API route.
 - **Python**: use Pyodide (WebAssembly) loaded client-side from the CDN. The
   harness result must be the last expression (not `print(...)`) so
   `pyodide.runPythonAsync()` can capture the return value directly.
+
+---
+
+## L-010 — Playwright strict mode: `getByText()` fails when multiple elements match
+
+**What happened**: E2E test used `page.getByText("Test Corp")` which matched 3
+elements (heading, company card body, company link). Playwright strict mode
+throws when a locator resolves to more than one element.
+
+**Rule**: Use `getByRole("heading", { name: "…" })` or scoped locators
+(`.within()`) when text appears in multiple DOM places. `getByText()` is only
+safe when the string is unique on the page. Always run E2E tests locally before
+pushing.
+
+---
+
+## L-011 — Supabase tables need explicit GRANT after creation; auto-grant is not applied
+
+**What happened**: `user_feedback` and `practice_sessions` tables were created
+via the Supabase SQL Editor. Despite having an `INSERT` policy, writes failed
+with `42501 permission denied`. The `service_role` and `authenticated` roles had
+no `GRANT` on the table — Supabase SQL Editor doesn't auto-grant like the Table
+Editor UI does.
+
+**Rule**: After creating any table via raw SQL, always run:
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.<table> TO authenticated;
+GRANT ALL ON public.<table> TO service_role;
+```
+Do this even when RLS policies exist — GRANTs and policies are separate layers.
+
+---
+
+## L-012 — `createBrowserClient("", "")` throws and crashes the React tree when env vars are absent
+
+**What happened**: E2E tests run without Supabase env vars set. `AuthButton`
+called `createClient()` → `createBrowserClient("", "")` which threw, unmounting
+the entire React tree. Every page rendered blank in CI.
+
+**Rule**: Guard any hook that calls Supabase with an early return when env vars
+are absent:
+```typescript
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  setLoading(false)
+  return
+}
+```
+Check for this in `useAuth` (and any hook that creates a Supabase client)
+before the first `createClient()` call.
+
+---
+
+## L-013 — `useState(initialProp)` does not re-sync when the prop changes after mount
+
+**What happened**: `SetupPanel` had `const [resumeText, setResumeText] = useState(initialResumeText)`.
+`useResume` in the parent hydrates localStorage in a `useEffect`, so the prop
+starts as `""` and updates to the saved value after mount. The `useState`
+initialiser only runs once — `SetupPanel` never saw the update and the resume
+textarea always appeared empty on return visits.
+
+**Rule**: Don't use `useState(prop)` as a local copy of a parent-managed value
+that may arrive late (e.g. after localStorage hydration). Either:
+1. Make it a controlled component (`value={prop}`, `onChange → parent setter`), or
+2. Sync with `useEffect(() => { if (prop && !localValue) setLocalValue(prop) }, [prop])`
+   (but only when the prop-first-arrival pattern is safe to use).
+
+---
+
+## L-014 — API routes referenced in hooks must actually exist before shipping
+
+**What happened**: `usePrepSession` called `POST /api/prep-sessions` and
+`PATCH /api/prep-sessions/[id]/notes`, and `useBehavioralBank` called
+`GET/POST /api/behavioral-bank` and `PATCH/DELETE /api/behavioral-bank/[id]`.
+All four routes were 404 in production because the route files were never
+created — only noted as future work. The hooks silently swallowed errors via
+`.catch()` so no test caught this.
+
+**Rule**: Before marking a feature complete, grep all `fetch("/api/…")` calls in
+hooks and verify each route file exists. If a route is intentionally deferred,
+wrap the call in a feature flag so it's never fired in production.
+
+---
+
+## L-015 — Client-generated UUID must be sent to the server when subsequent calls reference it
+
+**What happened**: `usePrepSession` generated a local UUID (`newSession.id`) but
+the `POST /api/prep-sessions` body didn't include it — the server would generate
+a different UUID. The subsequent `PATCH /api/prep-sessions/${session.id}/notes`
+used the local UUID, which didn't match any DB row, so notes never saved.
+
+**Rule**: When a client generates an ID (e.g. `crypto.randomUUID()`) and later
+makes follow-up API calls using that ID, always include the ID in the initial
+POST body. The server schema should accept `id?: string` and pass it to the DB
+insert (Postgres/Supabase accepts a client-supplied UUID for `gen_random_uuid()`
+columns when provided).

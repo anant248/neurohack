@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   min-height: 100dvh;

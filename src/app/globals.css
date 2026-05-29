@@ -19,6 +19,11 @@
   }
 }
 
+/* html background fills iOS safe-area insets — prevents white bars on notched phones */
+html {
+  background: #0f0c29;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -386,4 +391,128 @@ body {
   font-size: 0.92rem;
   font-weight: 600;
   color: #10b981;
+}
+
+/* ==================== FOOTER ==================== */
+.app-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  width: fit-content;
+}
+
+.footer-logo svg {
+  color: #667eea;
+  -webkit-text-fill-color: initial;
+  flex-shrink: 0;
+}
+
+.footer-privacy {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.45;
+  max-width: 340px;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.footer-bmc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 213, 79, 0.1);
+  border: 1px solid rgba(255, 213, 79, 0.25);
+  border-radius: 20px;
+  color: #ffd54f;
+  font-size: 0.73rem;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.footer-bmc:hover {
+  background: rgba(255, 213, 79, 0.2);
+  border-color: rgba(255, 213, 79, 0.45);
+}
+
+.footer-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.footer-share-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.footer-share-btn--copied {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+@media (max-width: 480px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .footer-right {
+    align-self: flex-end;
+  }
+
+  .footer-bmc span {
+    display: none;
+  }
 }

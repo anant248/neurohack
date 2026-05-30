@@ -13,7 +13,7 @@
 <div align="center">
   <a href="https://github.com/anant248/neurohack">
     <!-- 📸 IMAGE PLACEHOLDER: drop a square logo (80×80 px) at images/logo.png -->
-    <img src="images/logo.png" alt="Interprep Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Interprep Logo" width="140" height="140">
   </a>
 
   <h3 align="center">Interprep</h3>
@@ -62,7 +62,7 @@
 <!-- 📸 IMAGE PLACEHOLDER: drop a full-width screenshot at images/screenshot.png (recommended ~1400×800 px) -->
 [![Interprep Screenshot][product-screenshot]](https://neurohack25.vercel.app)
 
-Interprep is a full-stack interview preparation platform built for the NeuroHack 2025 hackathon. It combines in-browser **face landmark detection** with **Gemini-powered AI coaching** to give candidates actionable feedback on both their presence and their answers.
+Interprep is a full-stack interview preparation platform built for the [NeuroHack 2025 hackathon](https://devpost.com/software/interprep-0bt7uy). It combines in-browser **face landmark detection** with **Gemini-powered AI coaching** to give candidates actionable feedback on both their presence and their answers.
 
 **Behavioural Practice (`/practice`)**
 - Paste your resume + job description → Gemini generates **8–10 tailored behavioural questions** with STAR framework hints, specific to the role and your background
@@ -295,7 +295,7 @@ Live App: [https://neurohack25.vercel.app](https://neurohack25.vercel.app)
 [issues-shield]: https://img.shields.io/github/issues/anant248/neurohack.svg?style=for-the-badge
 [issues-url]: https://github.com/anant248/neurohack/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/anantgoyal
+[linkedin-url]: https://linkedin.com/in/anant-goyal1
 [product-screenshot]: images/screenshot.png
 
 [Next-badge]: https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white

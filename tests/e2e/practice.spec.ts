@@ -100,7 +100,7 @@ test.describe("Practice page", () => {
     await completeSetup(page)
     const select = page.getByRole("combobox")
     await select.selectOption({ index: 1 })
-    await expect(page.getByText("STAR")).toBeVisible()
+    await expect(page.getByText("STAR", { exact: true })).toBeVisible()
     await expect(page.getByText("Framework tip")).toBeVisible()
   })
 

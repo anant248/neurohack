@@ -168,10 +168,10 @@
 /* Mode cards — horizontal row */
 .mode-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
   width: 100%;
-  max-width: 600px;
+  max-width: 900px;
   margin-top: 8px;
 }
 
@@ -232,6 +232,12 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
+.mode-card-icon.coffee-chats {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
 .mode-card-text {
   flex: 1;
   text-align: left;
@@ -261,10 +267,13 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 760px) {
+  .mode-cards { grid-template-columns: 1fr; max-width: 100%; }
+}
+
 @media (max-width: 600px) {
   .landing-layout { height: auto; overflow: auto; }
   .landing-hero { padding: 24px 16px 32px; }
   .topbar-inner { padding: 0 16px; }
   .hero-heading { font-size: clamp(2.4rem, 10vw, 3.5rem); }
-  .mode-cards { grid-template-columns: 1fr; max-width: 100%; }
 }

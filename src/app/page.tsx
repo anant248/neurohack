@@ -157,6 +157,21 @@ export default function RootPage() {
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
+
+            <Link href="/coffee-chats" className="mode-card" data-testid="coffee-chats-card">
+              <div className="mode-card-icon coffee-chats">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM6 2v3M10 2v3M14 2v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="mode-card-text">
+                <div className="mode-card-title">Coffee Chats</div>
+                <div className="mode-card-desc">Prep questions &amp; capture notes from networking calls</div>
+              </div>
+              <svg className="mode-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
           </motion.div>
         </div>
       </main>

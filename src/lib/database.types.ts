@@ -136,6 +136,45 @@ export type Database = {
         }
         Relationships: []
       }
+      coffee_chats: {
+        Row: {
+          id: string
+          user_id: string
+          person_name: string
+          company: string
+          role: string
+          date: string | null
+          format: string
+          questions: unknown
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          person_name: string
+          company?: string
+          role?: string
+          date?: string | null
+          format?: string
+          questions?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          person_name?: string
+          company?: string
+          role?: string
+          date?: string | null
+          format?: string
+          questions?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           id: string

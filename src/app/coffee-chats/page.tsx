@@ -38,6 +38,8 @@ export default function CoffeeChatsPage() {
       date: updated.date,
       format: updated.format,
       questions: updated.questions,
+      todos: updated.todos,
+      aiGenerationsUsed: updated.aiGenerationsUsed,
     })
   }
 

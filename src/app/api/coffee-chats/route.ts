@@ -1,6 +1,9 @@
 import { type NextRequest } from "next/server"
 import { z } from "zod"
 import { createServerClient } from "@/lib/supabase/server"
+import type { Database } from "@/lib/database.types"
+
+type CoffeeChatInsert = Database["public"]["Tables"]["coffee_chats"]["Insert"]
 
 const QuestionSchema = z.object({
   id: z.string(),
@@ -16,7 +19,8 @@ const TodoSchema = z.object({
 })
 
 const ChatSchema = z.object({
-  personName: z.string().min(1).max(200),
+  id: z.string().uuid().optional(),
+  personName: z.string().max(200).default(""),
   company: z.string().max(200).default(""),
   role: z.string().max(200).default(""),
   date: z.string().max(20).optional(),
@@ -34,7 +38,7 @@ export async function GET(): Promise<Response> {
   try {
     const supabase = await createServerClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return Response.json({ chats: [] })
+    if (!user) return Response.json({ chats: [], authenticated: false })
 
     const { data, error } = await supabase
       .from("coffee_chats")
@@ -44,7 +48,7 @@ export async function GET(): Promise<Response> {
       .limit(100)
 
     if (error) throw error
-    return Response.json({ chats: data ?? [] })
+    return Response.json({ chats: data ?? [], authenticated: true })
   } catch (error) {
     console.error("[GET /api/coffee-chats]", error)
     return Response.json({ error: "Internal server error" }, { status: 500 })
@@ -72,19 +76,22 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
+    const insertRow: CoffeeChatInsert = {
+      user_id: user.id,
+      person_name: parsed.data.personName,
+      company: parsed.data.company,
+      role: parsed.data.role,
+      date: parsed.data.date ?? null,
+      format: parsed.data.format,
+      questions: parsed.data.questions,
+      todos: parsed.data.todos,
+      ai_generations_used: parsed.data.aiGenerationsUsed,
+      ...(parsed.data.id ? { id: parsed.data.id } : {}),
+    }
+
     const { data, error } = await supabase
       .from("coffee_chats")
-      .insert({
-        user_id: user.id,
-        person_name: parsed.data.personName,
-        company: parsed.data.company,
-        role: parsed.data.role,
-        date: parsed.data.date ?? null,
-        format: parsed.data.format,
-        questions: parsed.data.questions,
-        todos: parsed.data.todos,
-        ai_generations_used: parsed.data.aiGenerationsUsed,
-      })
+      .insert(insertRow)
       .select()
       .single()
 

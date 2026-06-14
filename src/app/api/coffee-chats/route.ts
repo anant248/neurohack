@@ -1,6 +1,9 @@
 import { type NextRequest } from "next/server"
 import { z } from "zod"
 import { createServerClient } from "@/lib/supabase/server"
+import type { Database } from "@/lib/database.types"
+
+type CoffeeChatInsert = Database["public"]["Tables"]["coffee_chats"]["Insert"]
 
 const QuestionSchema = z.object({
   id: z.string(),
@@ -16,6 +19,7 @@ const TodoSchema = z.object({
 })
 
 const ChatSchema = z.object({
+  id: z.string().uuid().optional(),
   personName: z.string().max(200).default(""),
   company: z.string().max(200).default(""),
   role: z.string().max(200).default(""),
@@ -72,19 +76,22 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
+    const insertRow: CoffeeChatInsert = {
+      user_id: user.id,
+      person_name: parsed.data.personName,
+      company: parsed.data.company,
+      role: parsed.data.role,
+      date: parsed.data.date ?? null,
+      format: parsed.data.format,
+      questions: parsed.data.questions,
+      todos: parsed.data.todos,
+      ai_generations_used: parsed.data.aiGenerationsUsed,
+      ...(parsed.data.id ? { id: parsed.data.id } : {}),
+    }
+
     const { data, error } = await supabase
       .from("coffee_chats")
-      .insert({
-        user_id: user.id,
-        person_name: parsed.data.personName,
-        company: parsed.data.company,
-        role: parsed.data.role,
-        date: parsed.data.date ?? null,
-        format: parsed.data.format,
-        questions: parsed.data.questions,
-        todos: parsed.data.todos,
-        ai_generations_used: parsed.data.aiGenerationsUsed,
-      })
+      .insert(insertRow)
       .select()
       .single()
 

@@ -19,7 +19,7 @@ const TodoSchema = z.object({
 })
 
 const PatchSchema = z.object({
-  personName: z.string().min(1).max(200).optional(),
+  personName: z.string().max(200).optional(),
   company: z.string().max(200).optional(),
   role: z.string().max(200).optional(),
   date: z.string().max(20).nullable().optional(),

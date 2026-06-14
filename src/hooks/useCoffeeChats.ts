@@ -78,6 +78,7 @@ export function useCoffeeChats() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            id: chat.id,
             personName: data.personName,
             company: data.company,
             role: data.role,

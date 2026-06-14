@@ -23,14 +23,14 @@ test.describe("Landing page", () => {
     await expect(page.locator("header").getByText("Interprep")).toBeVisible()
   })
 
-  test("shows the Behavioral Practice card", async ({ page }) => {
+  test("shows the Behavioural card", async ({ page }) => {
     await expect(page.getByTestId("behavioral-card")).toBeVisible()
-    await expect(page.getByTestId("behavioral-card")).toContainText("Behavioral Practice")
+    await expect(page.getByTestId("behavioral-card")).toContainText("Behavioural")
   })
 
-  test("shows the Technical Interview card", async ({ page }) => {
+  test("shows the Technical card", async ({ page }) => {
     await expect(page.getByTestId("technical-card")).toBeVisible()
-    await expect(page.getByTestId("technical-card")).toContainText("Technical Interview")
+    await expect(page.getByTestId("technical-card")).toContainText("Technical")
   })
 
   test("Behavioral Practice card links to /practice", async ({ page }) => {

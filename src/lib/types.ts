@@ -60,3 +60,32 @@ export interface BehavioralBankEntry {
   tags: string[]
   createdAt: Date
 }
+
+// ── Coffee Chats ──────────────────────────────────────────────────────────────
+
+export interface CoffeeChatQuestion {
+  id: string
+  text: string
+  notes: string // TipTap HTML
+}
+
+export interface CoffeeChatTodo {
+  id: string
+  text: string
+  done: boolean
+  aiGenerated: boolean
+}
+
+export interface CoffeeChat {
+  id: string
+  personName: string
+  company: string
+  role: string
+  date: string // "YYYY-MM-DD"
+  format: "virtual" | "in-person"
+  questions: CoffeeChatQuestion[]
+  todos: CoffeeChatTodo[]
+  aiGenerationsUsed: number // max 3 per chat
+  createdAt: Date
+  updatedAt: Date
+}

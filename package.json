@@ -16,6 +16,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-python": "^6.2.1",
+    "@floating-ui/dom": "^1.7.6",
     "@google/generative-ai": "^0.24.1",
     "@mediapipe/tasks-vision": "^0.10.3",
     "@radix-ui/react-slot": "^1.2.4",

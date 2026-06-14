@@ -79,7 +79,7 @@ Otherwise return ONLY a valid JSON array of strings, no markdown, no explanation
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-3.1-flash-lite",
       generationConfig: { maxOutputTokens: 300, temperature: 0.4 },
     })
 

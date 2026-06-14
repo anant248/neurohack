@@ -16,7 +16,7 @@ export async function GET(): Promise<Response> {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return Response.json({ entries: [] })
+      return Response.json({ entries: [], authenticated: false })
     }
 
     const { data, error } = await supabase
@@ -28,7 +28,7 @@ export async function GET(): Promise<Response> {
 
     if (error) throw error
 
-    return Response.json({ entries: data ?? [] })
+    return Response.json({ entries: data ?? [], authenticated: true })
   } catch (error) {
     console.error("[GET /api/behavioral-bank]", error)
     return Response.json({ error: "Internal server error" }, { status: 500 })
@@ -37,6 +37,7 @@ export async function GET(): Promise<Response> {
 
 // ── POST /api/behavioral-bank ─────────────────────────────────────────────────
 const PostSchema = z.object({
+  id: z.string().uuid().optional(),
   title: z.string().min(1).max(200),
   situation: z.string().max(2000).default(""),
   task: z.string().max(2000).default(""),
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { data, error } = await supabase
       .from("behavioral_bank_entries")
       .insert({
+        ...(parsed.data.id ? { id: parsed.data.id } : {}),
         user_id: user.id,
         title: parsed.data.title,
         situation: parsed.data.situation,

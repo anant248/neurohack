@@ -38,7 +38,7 @@ export async function GET(): Promise<Response> {
   try {
     const supabase = await createServerClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return Response.json({ chats: [] })
+    if (!user) return Response.json({ chats: [], authenticated: false })
 
     const { data, error } = await supabase
       .from("coffee_chats")
@@ -48,7 +48,7 @@ export async function GET(): Promise<Response> {
       .limit(100)
 
     if (error) throw error
-    return Response.json({ chats: data ?? [] })
+    return Response.json({ chats: data ?? [], authenticated: true })
   } catch (error) {
     console.error("[GET /api/coffee-chats]", error)
     return Response.json({ error: "Internal server error" }, { status: 500 })

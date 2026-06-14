@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import type { CoffeeChat, CoffeeChatQuestion, CoffeeChatTodo } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
 
@@ -47,14 +47,17 @@ function remoteToLocal(r: Record<string, unknown>): CoffeeChat {
 
 export function useCoffeeChats() {
   const [chats, setChats] = useState<CoffeeChat[]>([])
+  const isAuthRef = useRef(false)
 
   useEffect(() => {
     setChats(loadFromStorage())
 
     if (FLAGS.SUPABASE_PERSISTENCE) {
       fetch("/api/coffee-chats")
-        .then(r => (r.ok ? r.json() : { chats: [] }))
-        .then(({ chats: remote }: { chats: Array<Record<string, unknown>> }) => {
+        .then(r => (r.ok ? r.json() : { chats: [], authenticated: false }))
+        .then(({ chats: remote, authenticated }: { chats: Array<Record<string, unknown>>; authenticated?: boolean }) => {
+          if (!authenticated) return
+          isAuthRef.current = true
           const mapped = remote.map(remoteToLocal)
           setChats(mapped)
           saveToStorage(mapped)
@@ -73,7 +76,7 @@ export function useCoffeeChats() {
         return next
       })
 
-      if (FLAGS.SUPABASE_PERSISTENCE) {
+      if (FLAGS.SUPABASE_PERSISTENCE && isAuthRef.current) {
         fetch("/api/coffee-chats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,7 +108,7 @@ export function useCoffeeChats() {
         return next
       })
 
-      if (FLAGS.SUPABASE_PERSISTENCE) {
+      if (FLAGS.SUPABASE_PERSISTENCE && isAuthRef.current) {
         fetch(`/api/coffee-chats/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -123,7 +126,7 @@ export function useCoffeeChats() {
       return next
     })
 
-    if (FLAGS.SUPABASE_PERSISTENCE) {
+    if (FLAGS.SUPABASE_PERSISTENCE && isAuthRef.current) {
       fetch(`/api/coffee-chats/${id}`, { method: "DELETE" }).catch(err =>
         console.error("[useCoffeeChats] Failed to delete:", err),
       )

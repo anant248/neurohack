@@ -16,7 +16,7 @@ const TodoSchema = z.object({
 })
 
 const ChatSchema = z.object({
-  personName: z.string().min(1).max(200),
+  personName: z.string().max(200).default(""),
   company: z.string().max(200).default(""),
   role: z.string().max(200).default(""),
   date: z.string().max(20).optional(),

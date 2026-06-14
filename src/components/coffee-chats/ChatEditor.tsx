@@ -20,16 +20,28 @@ export function ChatEditor({ chat, allChats, onChange, onDelete }: ChatEditorPro
   const [customQuestion, setCustomQuestion] = useState("")
   const [selectedSuggested, setSelectedSuggested] = useState("")
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const localRef = useRef<CoffeeChat>(local)
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
 
   // Sync when parent switches to a different chat
   useEffect(() => {
     setLocal(chat)
+    localRef.current = chat
     setShowDeleteConfirm(false)
     setShowImport(false)
   }, [chat.id])
 
-  const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+  // Flush any pending debounce on unmount so notes are never lost when switching chats
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+        debounceRef.current = null
+        onChangeRef.current(localRef.current)
+      }
+    }
+  }, [])
 
   const flush = useCallback(
     (updated: CoffeeChat) => {
@@ -42,6 +54,7 @@ export function ChatEditor({ chat, allChats, onChange, onDelete }: ChatEditorPro
   const update = (patch: Partial<CoffeeChat>) => {
     const updated = { ...local, ...patch, updatedAt: new Date() }
     setLocal(updated)
+    localRef.current = updated
     flush(updated)
   }
 

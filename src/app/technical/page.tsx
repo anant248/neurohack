@@ -307,6 +307,7 @@ export default function TechnicalPage() {
           </Link>
           <div className="topbar-actions">
             <Link href="/practice" className="nav-link">Behavioural</Link>
+            <Link href="/coffee-chats" className="nav-link">Coffee Chats</Link>
             <AuthButton />
           </div>
         </div>

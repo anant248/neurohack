@@ -101,8 +101,17 @@ export function RichToolbar({ editor }: RichToolbarProps) {
           />
         </label>
 
-        {/* Highlight */}
-        <label className={`rich-toolbar-btn rich-toolbar-color-btn${editor.isActive("highlight") ? " rich-toolbar-btn--active" : ""}`} title="Highlight">
+        {/* Highlight — click toggles off when active; color picker sets color when not active */}
+        <label
+          className={`rich-toolbar-btn rich-toolbar-color-btn${editor.isActive("highlight") ? " rich-toolbar-btn--active" : ""}`}
+          title="Highlight"
+          onClick={e => {
+            if (editor.isActive("highlight")) {
+              e.preventDefault()
+              editor.chain().focus().unsetHighlight().run()
+            }
+          }}
+        >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
             <path d="M12 3L4 15h16L12 3zM4 15v4h16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -110,7 +119,7 @@ export function RichToolbar({ editor }: RichToolbarProps) {
             type="color"
             className="rich-toolbar-color-input"
             defaultValue="#f59e0b"
-            onChange={e => editor.chain().focus().toggleHighlight({ color: e.target.value }).run()}
+            onChange={e => editor.chain().focus().setHighlight({ color: e.target.value }).run()}
           />
         </label>
 

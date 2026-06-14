@@ -124,6 +124,7 @@ export default function PracticePage() {
         </Link>
         <div className="topbar-actions">
           <Link href="/technical" className="nav-link">Technical</Link>
+          <Link href="/coffee-chats" className="nav-link">Coffee Chats</Link>
           <button className="history-btn" onClick={() => setShowBank(true)} type="button">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path

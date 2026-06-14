@@ -69,6 +69,13 @@ export interface CoffeeChatQuestion {
   notes: string // TipTap HTML
 }
 
+export interface CoffeeChatTodo {
+  id: string
+  text: string
+  done: boolean
+  aiGenerated: boolean
+}
+
 export interface CoffeeChat {
   id: string
   personName: string
@@ -77,6 +84,8 @@ export interface CoffeeChat {
   date: string // "YYYY-MM-DD"
   format: "virtual" | "in-person"
   questions: CoffeeChatQuestion[]
+  todos: CoffeeChatTodo[]
+  aiGenerationsUsed: number // max 3 per chat
   createdAt: Date
   updatedAt: Date
 }

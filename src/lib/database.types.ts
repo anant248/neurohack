@@ -146,6 +146,8 @@ export type Database = {
           date: string | null
           format: string
           questions: unknown
+          todos: unknown
+          ai_generations_used: number
           created_at: string
           updated_at: string
         }
@@ -158,6 +160,8 @@ export type Database = {
           date?: string | null
           format?: string
           questions?: unknown
+          todos?: unknown
+          ai_generations_used?: number
           created_at?: string
           updated_at?: string
         }
@@ -170,6 +174,8 @@ export type Database = {
           date?: string | null
           format?: string
           questions?: unknown
+          todos?: unknown
+          ai_generations_used?: number
           created_at?: string
           updated_at?: string
         }

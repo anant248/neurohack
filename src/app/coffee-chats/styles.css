@@ -236,12 +236,20 @@ body {
   max-width: 260px;
 }
 
-/* ── Chat editor ── */
+/* ── Chat editor layout (two-column: main + sticky note) ── */
+.chat-editor-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 28px;
+}
+
 .chat-editor {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 760px;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Header fields */
@@ -787,6 +795,239 @@ body {
   cursor: pointer;
 }
 
+/* ==================== STICKY TO-DOs ==================== */
+
+.sticky-todos {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 28px;
+  background: #fef3c7;
+  border-radius: 2px 8px 8px 2px;
+  padding: 16px 14px 14px;
+  box-shadow: 3px 5px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* lined paper effect */
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 23px,
+    rgba(180, 140, 0, 0.15) 23px,
+    rgba(180, 140, 0, 0.15) 24px
+  );
+}
+
+/* Left tape strip */
+.sticky-todos::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #f59e0b;
+  border-radius: 2px 0 0 2px;
+}
+
+.sticky-todos-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(146, 64, 14, 0.2);
+}
+
+.sticky-todos-pin {
+  color: #92400e;
+  flex-shrink: 0;
+}
+
+.sticky-todos-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #78350f;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sticky-todos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 32px;
+}
+
+.sticky-todos-empty {
+  font-size: 0.72rem;
+  color: rgba(120, 53, 15, 0.55);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.sticky-todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 3px 2px;
+}
+
+.sticky-todo-check {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 1px;
+  line-height: 0;
+}
+
+.sticky-todo-text {
+  flex: 1;
+  font-size: 0.78rem;
+  color: #1c1917;
+  line-height: 1.45;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.sticky-todo-item--done .sticky-todo-text {
+  text-decoration: line-through;
+  color: rgba(28, 25, 23, 0.45);
+}
+
+.sticky-todo-ai-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #92400e;
+  background: rgba(146, 64, 14, 0.12);
+  border: 1px solid rgba(146, 64, 14, 0.2);
+  border-radius: 3px;
+  padding: 0 3px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.sticky-todo-delete {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: rgba(120, 53, 15, 0.3);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  margin-top: -1px;
+}
+
+.sticky-todo-delete:hover { color: #dc2626; }
+
+/* Add-todo row */
+.sticky-todo-add-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.sticky-todo-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(146, 64, 14, 0.2);
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 0.75rem;
+  color: #1c1917;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.sticky-todo-input::placeholder { color: rgba(120, 53, 15, 0.4); }
+.sticky-todo-input:focus { border-color: rgba(146, 64, 14, 0.45); background: rgba(255, 255, 255, 0.75); }
+
+.sticky-todo-add-btn {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  background: #92400e;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sticky-todo-add-btn:hover:not(:disabled) { background: #78350f; }
+.sticky-todo-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.sticky-divider {
+  height: 1px;
+  background: rgba(146, 64, 14, 0.15);
+  margin: 0 -2px;
+}
+
+/* AI section */
+.sticky-ai-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sticky-ai-message {
+  font-size: 0.7rem;
+  color: rgba(120, 53, 15, 0.7);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.sticky-ai-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 7px 10px;
+  background: #92400e;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sticky-ai-btn:hover:not(:disabled) { background: #78350f; }
+
+.sticky-ai-btn:disabled {
+  background: rgba(146, 64, 14, 0.3);
+  cursor: not-allowed;
+  color: rgba(120, 53, 15, 0.6);
+}
+
+/* Spinner */
+.sticky-ai-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: sticky-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sticky-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ==================== MOBILE ==================== */
 @media (max-width: 900px) {
   body { overflow: auto; height: auto; min-height: 100dvh; }
@@ -810,4 +1051,13 @@ body {
   .chat-editor-area { padding: 20px 16px; }
 
   .chat-meta-row { flex-direction: column; }
+
+  .chat-editor-layout { flex-direction: column; }
+
+  .sticky-todos {
+    width: 100%;
+    position: static;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
 }

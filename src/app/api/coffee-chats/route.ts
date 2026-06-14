@@ -8,6 +8,13 @@ const QuestionSchema = z.object({
   notes: z.string().max(50000).default(""),
 })
 
+const TodoSchema = z.object({
+  id: z.string(),
+  text: z.string().max(500),
+  done: z.boolean().default(false),
+  aiGenerated: z.boolean().default(false),
+})
+
 const ChatSchema = z.object({
   personName: z.string().min(1).max(200),
   company: z.string().max(200).default(""),
@@ -15,6 +22,8 @@ const ChatSchema = z.object({
   date: z.string().max(20).optional(),
   format: z.enum(["virtual", "in-person"]).default("virtual"),
   questions: z.array(QuestionSchema).max(50).default([]),
+  todos: z.array(TodoSchema).max(100).default([]),
+  aiGenerationsUsed: z.number().int().min(0).max(10).default(0),
 })
 
 // ── GET /api/coffee-chats ─────────────────────────────────────────────────────
@@ -73,6 +82,8 @@ export async function POST(req: NextRequest): Promise<Response> {
         date: parsed.data.date ?? null,
         format: parsed.data.format,
         questions: parsed.data.questions,
+        todos: parsed.data.todos,
+        ai_generations_used: parsed.data.aiGenerationsUsed,
       })
       .select()
       .single()

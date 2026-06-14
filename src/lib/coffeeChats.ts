@@ -26,5 +26,7 @@ export function emptyCoffeeChat(): Omit<CoffeeChat, "id" | "createdAt" | "update
     date: new Date().toISOString().split("T")[0],
     format: "virtual",
     questions: [],
+    todos: [],
+    aiGenerationsUsed: 0,
   }
 }

@@ -11,6 +11,13 @@ const QuestionSchema = z.object({
   notes: z.string().max(50000).default(""),
 })
 
+const TodoSchema = z.object({
+  id: z.string(),
+  text: z.string().max(500),
+  done: z.boolean().default(false),
+  aiGenerated: z.boolean().default(false),
+})
+
 const PatchSchema = z.object({
   personName: z.string().min(1).max(200).optional(),
   company: z.string().max(200).optional(),
@@ -18,6 +25,8 @@ const PatchSchema = z.object({
   date: z.string().max(20).nullable().optional(),
   format: z.enum(["virtual", "in-person"]).optional(),
   questions: z.array(QuestionSchema).max(50).optional(),
+  todos: z.array(TodoSchema).max(100).optional(),
+  aiGenerationsUsed: z.number().int().min(0).max(10).optional(),
 })
 
 // ── PATCH /api/coffee-chats/[id] ──────────────────────────────────────────────
@@ -58,6 +67,8 @@ export async function PATCH(
     if (patch.date !== undefined) dbPatch.date = patch.date
     if (patch.format !== undefined) dbPatch.format = patch.format
     if (patch.questions !== undefined) dbPatch.questions = patch.questions
+    if (patch.todos !== undefined) dbPatch.todos = patch.todos
+    if (patch.aiGenerationsUsed !== undefined) dbPatch.ai_generations_used = patch.aiGenerationsUsed
 
     const { data, error } = await supabase
       .from("coffee_chats")

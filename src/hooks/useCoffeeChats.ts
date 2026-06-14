@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import type { CoffeeChat, CoffeeChatQuestion } from "@/lib/types"
+import type { CoffeeChat, CoffeeChatQuestion, CoffeeChatTodo } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
 
 const STORAGE_KEY = "interprep-coffee-chats"
@@ -38,6 +38,8 @@ function remoteToLocal(r: Record<string, unknown>): CoffeeChat {
     date: (r.date as string) ?? "",
     format: (r.format as "virtual" | "in-person") ?? "virtual",
     questions: (r.questions as CoffeeChatQuestion[]) ?? [],
+    todos: (r.todos as CoffeeChatTodo[]) ?? [],
+    aiGenerationsUsed: (r.ai_generations_used as number) ?? 0,
     createdAt: new Date(r.created_at as string),
     updatedAt: new Date(r.updated_at as string),
   }
@@ -82,6 +84,8 @@ export function useCoffeeChats() {
             date: data.date,
             format: data.format,
             questions: data.questions,
+            todos: data.todos,
+            aiGenerationsUsed: data.aiGenerationsUsed,
           }),
         }).catch(err => console.error("[useCoffeeChats] Failed to add:", err))
       }

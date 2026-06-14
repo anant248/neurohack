@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import type { CoffeeChat, CoffeeChatQuestion } from "@/lib/types"
+import type { CoffeeChat, CoffeeChatQuestion, CoffeeChatTodo } from "@/lib/types"
 import { SUGGESTED_QUESTIONS } from "@/lib/coffeeChats"
 import { QuestionEditor } from "./QuestionEditor"
+import { StickyTodos } from "./StickyTodos"
 
 interface ChatEditorProps {
   chat: CoffeeChat
@@ -27,18 +28,37 @@ export function ChatEditor({ chat, allChats, onChange, onDelete }: ChatEditorPro
     setShowImport(false)
   }, [chat.id])
 
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
   const flush = useCallback(
     (updated: CoffeeChat) => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => onChange(updated), 400)
+      debounceRef.current = setTimeout(() => onChangeRef.current(updated), 400)
     },
-    [onChange],
+    [],
   )
 
   const update = (patch: Partial<CoffeeChat>) => {
     const updated = { ...local, ...patch, updatedAt: new Date() }
     setLocal(updated)
     flush(updated)
+  }
+
+  // Flush immediately (for todos/AI counter — need to persist ASAP)
+  const updateImmediate = useCallback((patch: Partial<CoffeeChat>) => {
+    if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null }
+    setLocal(prev => {
+      const updated = { ...prev, ...patch, updatedAt: new Date() }
+      onChangeRef.current(updated)
+      return updated
+    })
+  }, [])
+
+  const handleTodosChange = (newTodos: CoffeeChatTodo[], newAiCount?: number) => {
+    const patch: Partial<CoffeeChat> = { todos: newTodos }
+    if (newAiCount !== undefined) patch.aiGenerationsUsed = newAiCount
+    updateImmediate(patch)
   }
 
   const addSuggestedQuestion = () => {
@@ -84,6 +104,7 @@ export function ChatEditor({ chat, allChats, onChange, onDelete }: ChatEditorPro
   const importableChats = allChats.filter(c => c.id !== chat.id && c.questions.length > 0)
 
   return (
+    <div className="chat-editor-layout">
     <div className="chat-editor">
       {/* ── Header fields ── */}
       <div className="chat-editor-header">
@@ -256,6 +277,20 @@ export function ChatEditor({ chat, allChats, onChange, onDelete }: ChatEditorPro
           </button>
         )}
       </div>
+    </div>
+
+    {/* ── Sticky to-dos panel ── */}
+    <StickyTodos
+      todos={local.todos}
+      aiGenerationsUsed={local.aiGenerationsUsed}
+      chatContext={{
+        personName: local.personName,
+        company: local.company,
+        role: local.role,
+        questions: local.questions.map(q => ({ text: q.text, notes: q.notes })),
+      }}
+      onChange={handleTodosChange}
+    />
     </div>
   )
 }

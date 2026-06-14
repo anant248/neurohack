@@ -809,13 +809,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /* lined paper effect */
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 23px,
-    rgba(180, 140, 0, 0.15) 23px,
-    rgba(180, 140, 0, 0.15) 24px
-  );
 }
 
 /* Left tape strip */

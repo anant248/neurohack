@@ -272,125 +272,134 @@ export function AuthForm() {
 
         {error && <p className="auth-error">{error}</p>}
 
+        {/*
+          Both forms stay in the DOM at all times (toggled via display:none).
+          Removing a <input type="password"> that had content triggers Safari's
+          "Save Password?" prompt even without a real submission. Keeping the
+          node in the DOM prevents that — the prompt only fires on actual submit.
+        */}
+
         {/* ── Sign Up fields ── */}
-        {tab === "signup" && (
-          <div className="auth-form">
-            <div className="auth-field">
-              <label className="auth-field-label">
-                Full Name<span className="auth-required">*</span>
-              </label>
-              <input
-                type="text"
-                className="auth-input"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                autoComplete="off"
-                autoFocus
-              />
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-field-label">
-                Email Address<span className="auth-required">*</span>
-              </label>
-              <input
-                type="email"
-                className="auth-input"
-                placeholder="Enter your email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-field-label">
-                Password<span className="auth-required">*</span>
-              </label>
-              <div className="auth-pw-wrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="auth-input auth-input--pw"
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onKeyDown={onEnter(handleSignUp)}
-                  autoComplete="off"
-                />
-                <button
-                  type="button"
-                  className="auth-pw-toggle"
-                  onClick={() => setShowPassword(v => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-            </div>
-
-            <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignUp}>
-              {loading === "signup" ? <span className="auth-spinner" /> : "Sign Up"}
-            </button>
+        <div className="auth-form" style={tab !== "signup" ? { display: "none" } : undefined} aria-hidden={tab !== "signup"}>
+          <div className="auth-field">
+            <label className="auth-field-label">
+              Full Name<span className="auth-required">*</span>
+            </label>
+            <input
+              type="text"
+              className="auth-input"
+              placeholder="Enter your full name"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              autoComplete="name"
+              tabIndex={tab !== "signup" ? -1 : undefined}
+            />
           </div>
-        )}
+
+          <div className="auth-field">
+            <label className="auth-field-label">
+              Email Address<span className="auth-required">*</span>
+            </label>
+            <input
+              type="email"
+              className="auth-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="email"
+              tabIndex={tab !== "signup" ? -1 : undefined}
+            />
+          </div>
+
+          <div className="auth-field">
+            <label className="auth-field-label">
+              Password<span className="auth-required">*</span>
+            </label>
+            <div className="auth-pw-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="auth-input auth-input--pw"
+                placeholder="Create a password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={onEnter(handleSignUp)}
+                autoComplete="new-password"
+                tabIndex={tab !== "signup" ? -1 : undefined}
+              />
+              <button
+                type="button"
+                className="auth-pw-toggle"
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={tab !== "signup" ? -1 : undefined}
+              >
+                <EyeIcon open={showPassword} />
+              </button>
+            </div>
+          </div>
+
+          <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignUp} tabIndex={tab !== "signup" ? -1 : undefined}>
+            {loading === "signup" ? <span className="auth-spinner" /> : "Sign Up"}
+          </button>
+        </div>
 
         {/* ── Log In fields ── */}
-        {tab === "login" && (
-          <div className="auth-form">
-            <div className="auth-field">
-              <label className="auth-field-label">
-                Email Address<span className="auth-required">*</span>
-              </label>
-              <input
-                type="email"
-                className="auth-input"
-                placeholder="Enter your email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                autoComplete="off"
-                autoFocus
-              />
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-field-label">
-                Password<span className="auth-required">*</span>
-              </label>
-              <div className="auth-pw-wrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="auth-input auth-input--pw"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onKeyDown={onEnter(handleSignIn)}
-                  autoComplete="off"
-                />
-                <button
-                  type="button"
-                  className="auth-pw-toggle"
-                  onClick={() => setShowPassword(v => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-            </div>
-
-            <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignIn}>
-              {loading === "login" ? <span className="auth-spinner" /> : "Log In"}
-            </button>
-
-            <button
-              type="button"
-              className="auth-forgot-link"
-              onClick={() => { setView("forgot"); clearMessages(); setForgotEmail(email) }}
-            >
-              Forgot your password?
-            </button>
+        <div className="auth-form" style={tab !== "login" ? { display: "none" } : undefined} aria-hidden={tab !== "login"}>
+          <div className="auth-field">
+            <label className="auth-field-label">
+              Email Address<span className="auth-required">*</span>
+            </label>
+            <input
+              type="email"
+              className="auth-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="email"
+              tabIndex={tab !== "login" ? -1 : undefined}
+            />
           </div>
-        )}
+
+          <div className="auth-field">
+            <label className="auth-field-label">
+              Password<span className="auth-required">*</span>
+            </label>
+            <div className="auth-pw-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="auth-input auth-input--pw"
+                placeholder="Enter your password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={onEnter(handleSignIn)}
+                autoComplete="current-password"
+                tabIndex={tab !== "login" ? -1 : undefined}
+              />
+              <button
+                type="button"
+                className="auth-pw-toggle"
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={tab !== "login" ? -1 : undefined}
+              >
+                <EyeIcon open={showPassword} />
+              </button>
+            </div>
+          </div>
+
+          <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignIn} tabIndex={tab !== "login" ? -1 : undefined}>
+            {loading === "login" ? <span className="auth-spinner" /> : "Log In"}
+          </button>
+
+          <button
+            type="button"
+            className="auth-forgot-link"
+            onClick={() => { setView("forgot"); clearMessages(); setForgotEmail(email) }}
+            tabIndex={tab !== "login" ? -1 : undefined}
+          >
+            Forgot your password?
+          </button>
+        </div>
 
         {/* Divider */}
         <div className="auth-divider"><span>or</span></div>

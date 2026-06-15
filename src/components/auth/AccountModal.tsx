@@ -54,20 +54,34 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
   // Only email-provider users can change password
   const hasEmailAuth = user.identities?.some(i => i.provider === "email") ?? false
 
+  // Clear password fields then close — prevents Apple "Save Password?" popup
+  // (Safari fires when <input type="password"> is removed from DOM with content)
+  const handleClose = () => {
+    setOldPw(""); setNewPw(""); setConfirmPw("")
+    onClose()
+  }
+
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose() }
     document.addEventListener("keydown", handler)
     return () => document.removeEventListener("keydown", handler)
-  }, [onClose])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Save profile ──────────────────────────────────────────────────────────
   const saveProfile = async () => {
     if (!fullName.trim()) { setProfileMsg({ text: "Full name cannot be empty.", ok: false }); return }
     setProfileSaving(true)
     setProfileMsg(null)
-    const { error } = await supabase.auth.updateUser({ data: { full_name: fullName.trim() } })
+    const trimmed = fullName.trim()
+    // Update auth metadata and profiles table in parallel
+    const [{ error: authErr }, { error: profileErr }] = await Promise.all([
+      supabase.auth.updateUser({ data: { full_name: trimmed } }),
+      supabase.from("profiles").update({ full_name: trimmed }).eq("id", user.id),
+    ])
     setProfileSaving(false)
+    const error = authErr ?? profileErr
     if (error) {
       setProfileMsg({ text: error.message, ok: false })
     } else {
@@ -128,12 +142,12 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
   }
 
   return createPortal(
-    <div className="acct-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+    <div className="acct-overlay" onClick={e => { if (e.target === e.currentTarget) handleClose() }}>
       <div className="acct-modal" role="dialog" aria-modal aria-label="Account settings">
         {/* Header */}
         <div className="acct-header">
           <h2 className="acct-title">Account</h2>
-          <button type="button" className="acct-close" onClick={onClose} aria-label="Close">
+          <button type="button" className="acct-close" onClick={handleClose} aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>

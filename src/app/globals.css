@@ -167,6 +167,7 @@ html, body {
 /* ── Auth floating action menu ── */
 .auth-fab {
   position: relative;
+  z-index: 9000;
 }
 
 .auth-fab-trigger {
@@ -219,7 +220,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  z-index: 999;
+  z-index: 9001;
 }
 
 /* Individual pill items */

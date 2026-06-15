@@ -14,7 +14,7 @@ body {
   justify-content: center;
   flex: 1;
   min-height: calc(100dvh - 60px); /* 60px = footer height */
-  padding: 32px 24px;
+  padding: 16px 24px;
 }
 
 /* ── Card ── */
@@ -22,14 +22,14 @@ body {
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 28px;
-  padding: 44px 40px;
+  border-radius: 24px;
+  padding: 28px 32px;
   width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: 14px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 
@@ -38,18 +38,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 20px;
+  border-radius: 14px;
   color: #10b981;
-  box-shadow: 0 0 28px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
 }
 
 /* ── Text ── */
 .auth-title {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: white;
   text-align: center;
@@ -57,11 +57,11 @@ body {
 }
 
 .auth-subtitle {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.45);
   text-align: center;
   line-height: 1.5;
-  margin-top: -10px;
+  margin-top: -6px;
 }
 
 .auth-error {
@@ -88,7 +88,7 @@ body {
 
 .auth-tab {
   flex: 1;
-  padding: 9px 16px;
+  padding: 7px 16px;
   border-radius: 9px;
   border: none;
   background: transparent;
@@ -115,14 +115,14 @@ body {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
 }
 
 .auth-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -140,7 +140,7 @@ body {
 
 .auth-input {
   width: 100%;
-  padding: 11px 14px;
+  padding: 9px 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
@@ -192,7 +192,7 @@ body {
 /* ── Submit button ── */
 .auth-submit-btn {
   width: 100%;
-  padding: 13px 20px;
+  padding: 11px 20px;
   background: #10b981;
   border: none;
   border-radius: 999px;
@@ -291,7 +291,7 @@ body {
 .auth-providers {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -301,7 +301,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 13px 20px;
+  padding: 10px 20px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
@@ -354,5 +354,5 @@ body {
 }
 
 @media (max-width: 480px) {
-  .auth-card { padding: 32px 24px; border-radius: 20px; }
+  .auth-card { padding: 20px 20px; border-radius: 18px; }
 }

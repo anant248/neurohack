@@ -103,6 +103,18 @@ describe("buildPyHarness", () => {
   })
 })
 
+const LIST_NODE_META = JSON.stringify({
+  name: "deleteMiddle",
+  params: [{ name: "head", type: "ListNode" }],
+  return: { type: "ListNode" },
+})
+
+const TREE_NODE_META = JSON.stringify({
+  name: "invertTree",
+  params: [{ name: "root", type: "TreeNode" }],
+  return: { type: "TreeNode" },
+})
+
 describe("buildPyHarnessClient", () => {
   it("embeds the user code", () => {
     const harness = buildPyHarnessClient("def twoSum(a,b): pass", "twoSum", [])
@@ -114,6 +126,48 @@ describe("buildPyHarnessClient", () => {
     const trimmed = harness.trimEnd()
     expect(trimmed.endsWith("__json.dumps(__results)")).toBe(true)
     expect(trimmed).not.toMatch(/print\s*\(/)
+  })
+
+  it("injects ListNode class definition when metaData includes ListNode param", () => {
+    const harness = buildPyHarnessClient("def deleteMiddle(head): pass", "deleteMiddle", [], LIST_NODE_META)
+    expect(harness).toContain("class ListNode:")
+    expect(harness).toContain("def _arr_to_listnode(arr):")
+    expect(harness).toContain("def _listnode_to_arr(head):")
+  })
+
+  it("does NOT inject ListNode class for plain problems", () => {
+    const harness = buildPyHarnessClient("def twoSum(a,b): pass", "twoSum", [], TWO_SUM_META)
+    expect(harness).not.toContain("class ListNode:")
+  })
+
+  it("converts ListNode inputs by wrapping with _arr_to_listnode", () => {
+    const harness = buildPyHarnessClient("", "deleteMiddle", [], LIST_NODE_META)
+    expect(harness).toContain('_arr_to_listnode(tc["inputs"][0])')
+  })
+
+  it("converts ListNode return value with _listnode_to_arr before comparison", () => {
+    const harness = buildPyHarnessClient("", "deleteMiddle", [], LIST_NODE_META)
+    expect(harness).toContain("_listnode_to_arr(__actual)")
+  })
+
+  it("injects TreeNode class definition when metaData includes TreeNode param", () => {
+    const harness = buildPyHarnessClient("def invertTree(root): pass", "invertTree", [], TREE_NODE_META)
+    expect(harness).toContain("class TreeNode:")
+    expect(harness).toContain("def _arr_to_treenode(arr):")
+    expect(harness).toContain("def _treenode_to_arr(root):")
+  })
+
+  it("places type definitions before user code so annotations resolve", () => {
+    const harness = buildPyHarnessClient("def deleteMiddle(head): pass", "deleteMiddle", [], LIST_NODE_META)
+    const listNodeIdx = harness.indexOf("class ListNode:")
+    const userCodeIdx = harness.indexOf("def deleteMiddle(head): pass")
+    expect(listNodeIdx).toBeGreaterThanOrEqual(0)
+    expect(userCodeIdx).toBeGreaterThan(listNodeIdx)
+  })
+
+  it("uses *tc[\"inputs\"] for plain problems with no metadata", () => {
+    const harness = buildPyHarnessClient("def f(a,b): pass", "f", [{ inputs: [1, 2], expected: 3 }])
+    expect(harness).toContain('f(*tc["inputs"])')
   })
 })
 

@@ -66,7 +66,6 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose() }
     document.addEventListener("keydown", handler)
     return () => document.removeEventListener("keydown", handler)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Save profile ──────────────────────────────────────────────────────────

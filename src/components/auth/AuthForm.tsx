@@ -22,24 +22,26 @@ function EyeIcon({ open }: { open: boolean }) {
   )
 }
 
+function onEnter(fn: () => void) {
+  return (e: React.KeyboardEvent) => { if (e.key === "Enter") fn() }
+}
+
 export function AuthForm() {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>("login")
   const [view, setView] = useState<View>("auth")
 
-  // Form fields
+  // Form fields — cleared on tab switch to prevent cross-tab persistence
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [forgotEmail, setForgotEmail] = useState("")
 
-  // State
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // Surface ?error=oauth_failed set by callback route
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get("error") === "oauth_failed") {
@@ -50,6 +52,12 @@ export function AuthForm() {
   const clearMessages = () => { setError(null); setSuccessMsg(null) }
 
   const handleTabSwitch = (t: Tab) => {
+    // Clear all fields immediately so the browser never sees a filled password
+    // field being removed from the DOM (which triggers the "save password?" prompt)
+    setFullName("")
+    setEmail("")
+    setPassword("")
+    setShowPassword(false)
     setTab(t)
     setView("auth")
     clearMessages()
@@ -68,8 +76,7 @@ export function AuthForm() {
   }
 
   // ── Email sign-up ──────────────────────────────────────────────────────────
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSignUp = async () => {
     if (!fullName.trim()) { setError("Full name is required."); return }
     if (!email.trim()) { setError("Email is required."); return }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return }
@@ -83,17 +90,11 @@ export function AuthForm() {
       options: { data: { full_name: fullName.trim() } },
     })
 
-    if (error) {
-      setError(error.message)
-      setLoading(null)
-      return
-    }
+    if (error) { setError(error.message); setLoading(null); return }
 
     if (data.session) {
-      // Email confirmation not required — auto signed in
       router.push("/practice")
     } else {
-      // Confirmation email sent
       setSuccessMsg("Check your email to confirm your account, then log in.")
       setLoading(null)
       setView("check-email")
@@ -101,8 +102,7 @@ export function AuthForm() {
   }
 
   // ── Email sign-in ──────────────────────────────────────────────────────────
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSignIn = async () => {
     if (!email.trim()) { setError("Email is required."); return }
     if (!password) { setError("Password is required."); return }
 
@@ -111,17 +111,12 @@ export function AuthForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setError(error.message)
-      setLoading(null)
-    } else {
-      router.push("/practice")
-    }
+    if (error) { setError(error.message); setLoading(null) }
+    else { router.push("/practice") }
   }
 
   // ── Forgot password ────────────────────────────────────────────────────────
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleForgotPassword = async () => {
     if (!forgotEmail.trim()) { setError("Email is required."); return }
 
     setLoading("forgot")
@@ -131,12 +126,10 @@ export function AuthForm() {
       redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     })
 
-    if (error) {
-      setError(error.message)
-      setLoading(null)
-    } else {
-      setView("check-email")
+    if (error) { setError(error.message); setLoading(null) }
+    else {
       setSuccessMsg("If an account exists for that email, a reset link has been sent.")
+      setView("check-email")
       setLoading(null)
     }
   }
@@ -164,7 +157,7 @@ export function AuthForm() {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <form className="auth-form" onSubmit={handleForgotPassword}>
+          <div className="auth-form">
             <div className="auth-field">
               <label className="auth-field-label">
                 Email Address<span className="auth-required">*</span>
@@ -175,15 +168,15 @@ export function AuthForm() {
                 placeholder="Enter your email"
                 value={forgotEmail}
                 onChange={e => setForgotEmail(e.target.value)}
-                required
+                onKeyDown={onEnter(handleForgotPassword)}
                 autoFocus
               />
             </div>
 
-            <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+            <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleForgotPassword}>
               {loading === "forgot" ? <span className="auth-spinner" /> : "Send Reset Link"}
             </button>
-          </form>
+          </div>
 
           <button
             type="button"
@@ -279,9 +272,9 @@ export function AuthForm() {
 
         {error && <p className="auth-error">{error}</p>}
 
-        {/* ── Sign Up form ── */}
+        {/* ── Sign Up fields ── */}
         {tab === "signup" && (
-          <form className="auth-form" onSubmit={handleSignUp}>
+          <div className="auth-form">
             <div className="auth-field">
               <label className="auth-field-label">
                 Full Name<span className="auth-required">*</span>
@@ -292,7 +285,7 @@ export function AuthForm() {
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                autoComplete="name"
+                autoComplete="off"
                 autoFocus
               />
             </div>
@@ -307,7 +300,7 @@ export function AuthForm() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                autoComplete="email"
+                autoComplete="off"
               />
             </div>
 
@@ -322,7 +315,8 @@ export function AuthForm() {
                   placeholder="Create a password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  autoComplete="new-password"
+                  onKeyDown={onEnter(handleSignUp)}
+                  autoComplete="off"
                 />
                 <button
                   type="button"
@@ -335,15 +329,15 @@ export function AuthForm() {
               </div>
             </div>
 
-            <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+            <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignUp}>
               {loading === "signup" ? <span className="auth-spinner" /> : "Sign Up"}
             </button>
-          </form>
+          </div>
         )}
 
-        {/* ── Log In form ── */}
+        {/* ── Log In fields ── */}
         {tab === "login" && (
-          <form className="auth-form" onSubmit={handleSignIn}>
+          <div className="auth-form">
             <div className="auth-field">
               <label className="auth-field-label">
                 Email Address<span className="auth-required">*</span>
@@ -354,7 +348,7 @@ export function AuthForm() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                autoComplete="email"
+                autoComplete="off"
                 autoFocus
               />
             </div>
@@ -370,7 +364,8 @@ export function AuthForm() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  onKeyDown={onEnter(handleSignIn)}
+                  autoComplete="off"
                 />
                 <button
                   type="button"
@@ -383,7 +378,7 @@ export function AuthForm() {
               </div>
             </div>
 
-            <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+            <button type="button" className="auth-submit-btn" disabled={isLoading} onClick={handleSignIn}>
               {loading === "login" ? <span className="auth-spinner" /> : "Log In"}
             </button>
 
@@ -394,7 +389,7 @@ export function AuthForm() {
             >
               Forgot your password?
             </button>
-          </form>
+          </div>
         )}
 
         {/* Divider */}

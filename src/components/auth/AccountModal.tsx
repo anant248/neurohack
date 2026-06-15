@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
@@ -126,7 +127,7 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
     router.refresh()
   }
 
-  return (
+  return createPortal(
     <div className="acct-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="acct-modal" role="dialog" aria-modal aria-label="Account settings">
         {/* Header */}
@@ -299,6 +300,7 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -2,6 +2,26 @@
 
 ---
 
+## feature/auth-improvement — IN PROGRESS
+
+### Tasks
+- [x] Create branch from main
+- [x] Rewrite AuthForm.tsx — tabs (Log In / Sign Up), email+password fields, forgot password flow
+- [x] Update auth/styles.css — form inputs, tabs, divider, submit button, error/success states
+- [x] Update AuthButton.tsx — 2-letter initials from full_name/name metadata
+- [x] Update auth/callback/route.ts — redirect recovery flow to /auth/reset-password
+- [x] Create src/app/auth/reset-password/page.tsx — new password entry after reset link
+
+### Spec
+- Log In tab: email + password (show/hide) + "Log In" button + "Forgot your password?" link + divider + Google + GitHub + skip
+- Sign Up tab: full name* + email* + password* (show/hide) + "Sign Up" button + divider + Google + GitHub + skip
+- Red asterisk on required fields; password show/hide toggle
+- Forgot password: email field → "Send reset link" → success "check your email" state
+- Reset page (/auth/reset-password): new password + confirm, calls updateUser({ password })
+- full_name stored in user_metadata; AuthButton shows 2-letter initials (JD for John Doe)
+
+---
+
 ## Phase 5: Behavioral Page Overhaul — COMPLETE ✅
 
 All items complete. 105/105 tests pass, type-check clean, lint clean.

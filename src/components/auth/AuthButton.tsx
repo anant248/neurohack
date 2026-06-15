@@ -40,7 +40,10 @@ export function AuthButton() {
   }
 
   const avatarUrl = user.user_metadata?.avatar_url as string | undefined
-  const initials = (user.email?.[0] ?? "U").toUpperCase()
+  const fullName = (user.user_metadata?.full_name ?? user.user_metadata?.name ?? "") as string
+  const initials = fullName.trim()
+    ? fullName.trim().split(/\s+/).map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
+    : (user.email?.[0] ?? "U").toUpperCase()
 
   return (
     <div className="auth-fab" ref={wrapperRef}>

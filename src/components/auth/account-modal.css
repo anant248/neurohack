@@ -1,0 +1,365 @@
+/* ── Overlay ── */
+.acct-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+/* ── Modal card ── */
+.acct-modal {
+  background: rgba(18, 18, 24, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.acct-modal::-webkit-scrollbar { width: 4px; }
+.acct-modal::-webkit-scrollbar-track { background: transparent; }
+.acct-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── Header ── */
+.acct-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+  flex-shrink: 0;
+}
+
+.acct-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.acct-close {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.5);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.acct-close:hover {
+  color: white;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ── Sections ── */
+.acct-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.acct-section:last-child {
+  border-bottom: none;
+}
+
+.acct-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 2px;
+}
+
+/* ── Fields ── */
+.acct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.acct-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.01em;
+}
+
+.acct-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.acct-input::placeholder {
+  color: rgba(255,255,255,0.22);
+}
+
+.acct-input:focus {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.acct-input--readonly {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.acct-input--readonly:focus {
+  border-color: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+
+.acct-input--pw {
+  padding-right: 42px;
+}
+
+/* ── Password wrapper ── */
+.acct-pw-wrap {
+  position: relative;
+}
+
+.acct-pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.acct-pw-toggle:hover {
+  color: rgba(255,255,255,0.65);
+}
+
+/* ── Feedback messages ── */
+.acct-msg {
+  font-size: 0.82rem;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.acct-msg--ok {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.acct-msg--err {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+/* ── Save button ── */
+.acct-btn-save {
+  align-self: flex-start;
+  padding: 8px 20px;
+  background: #10b981;
+  border: none;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 110px;
+  justify-content: center;
+}
+
+.acct-btn-save:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.acct-btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── OAuth note ── */
+.acct-oauth-note {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Actions section ── */
+.acct-section--actions {
+  gap: 8px;
+}
+
+.acct-btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.acct-btn-logout:hover {
+  background: rgba(255,255,255,0.09);
+  color: white;
+}
+
+.acct-btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.acct-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ── Delete confirmation ── */
+.acct-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acct-delete-warning {
+  font-size: 0.83rem;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.acct-delete-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.acct-btn-cancel {
+  flex: 1;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.acct-btn-cancel:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.acct-btn-delete-final {
+  flex: 1;
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.85);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.acct-btn-delete-final:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.acct-btn-delete-final:disabled,
+.acct-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ── */
+.acct-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: acct-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes acct-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .acct-modal { border-radius: 16px; }
+  .acct-header { padding: 16px 18px 0; }
+  .acct-section { padding: 16px 18px; }
+}

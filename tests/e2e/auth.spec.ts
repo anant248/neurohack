@@ -2,10 +2,6 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Auth page", () => {
   test.beforeEach(async ({ page }) => {
-    // Stub Supabase auth endpoints so no real network calls are made
-    await page.route("**/auth/v1/**", route =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) }),
-    )
     await page.goto("/auth")
   })
 
@@ -18,48 +14,53 @@ test.describe("Auth page", () => {
     await expect(page.getByText("Interprep")).toBeVisible()
   })
 
+  // Tabs have role="tab" (not role="button") — use getByRole("tab")
   test("shows Login and Sign Up tabs", async ({ page }) => {
-    await expect(page.getByRole("button", { name: /log\s*in/i })).toBeVisible()
-    await expect(page.getByRole("button", { name: /sign\s*up/i })).toBeVisible()
+    await expect(page.getByRole("tab", { name: "Log In" })).toBeVisible()
+    await expect(page.getByRole("tab", { name: "Sign Up" })).toBeVisible()
   })
 
   test("Sign Up tab shows Full Name field", async ({ page }) => {
-    await page.getByRole("button", { name: /sign\s*up/i }).click()
-    await expect(page.getByPlaceholder(/your full name/i)).toBeVisible()
+    await page.getByRole("tab", { name: "Sign Up" }).click()
+    // Signup panel is first .auth-form div; placeholder is "Enter your full name"
+    await expect(
+      page.locator(".auth-form").first().getByPlaceholder("Enter your full name")
+    ).toBeVisible()
   })
 
   test("Sign Up tab shows email and password fields", async ({ page }) => {
-    await page.getByRole("button", { name: /sign\s*up/i }).click()
-    // email
-    await expect(page.getByPlaceholder(/your@email\.com/i)).toBeVisible()
-    // password — at least one password input visible
-    const pwInputs = page.locator('input[type="password"]')
-    await expect(pwInputs.first()).toBeVisible()
+    await page.getByRole("tab", { name: "Sign Up" }).click()
+    const signupPanel = page.locator(".auth-form").first()
+    // Both use "Enter your email"; password uses "Create a password"
+    await expect(signupPanel.locator('input[type="email"]')).toBeVisible()
+    await expect(signupPanel.locator('input[type="password"]')).toBeVisible()
   })
 
   test("Log In tab shows email and password fields", async ({ page }) => {
-    await page.getByRole("button", { name: /log\s*in/i }).click()
-    await expect(page.getByPlaceholder(/your@email\.com/i)).toBeVisible()
-    const pwInput = page.locator('input[type="password"]')
-    await expect(pwInput.first()).toBeVisible()
+    // Log In is the default active tab — login panel is second .auth-form div
+    const loginPanel = page.locator(".auth-form").nth(1)
+    await expect(loginPanel.locator('input[type="email"]')).toBeVisible()
+    await expect(loginPanel.locator('input[type="password"]')).toBeVisible()
   })
 
   test("Log In tab shows Forgot password link", async ({ page }) => {
-    await page.getByRole("button", { name: /log\s*in/i }).click()
-    await expect(page.getByText(/forgot password/i)).toBeVisible()
+    // Button text is "Forgot your password?" — regex must span "your"
+    await expect(
+      page.getByRole("button", { name: /forgot.*password/i })
+    ).toBeVisible()
   })
 
   test("fields clear when switching between tabs", async ({ page }) => {
-    // Type into Sign Up email
-    await page.getByRole("button", { name: /sign\s*up/i }).click()
-    const emailInput = page.getByPlaceholder(/your@email\.com/i)
-    await emailInput.fill("test@example.com")
+    // Default is Log In — fill email in the login panel
+    const loginPanel = page.locator(".auth-form").nth(1)
+    await loginPanel.locator('input[type="email"]').fill("test@example.com")
 
-    // Switch to Log In
-    await page.getByRole("button", { name: /log\s*in/i }).click()
-    // The login email input should be empty
-    const loginEmail = page.getByPlaceholder(/your@email\.com/i)
-    await expect(loginEmail).toHaveValue("")
+    // Switch to Sign Up → handleTabSwitch clears all fields
+    await page.getByRole("tab", { name: "Sign Up" }).click()
+
+    // Signup panel email must now be empty (shared state was cleared)
+    const signupPanel = page.locator(".auth-form").first()
+    await expect(signupPanel.locator('input[type="email"]')).toHaveValue("")
   })
 
   test("shows Google and GitHub OAuth buttons", async ({ page }) => {
@@ -77,19 +78,25 @@ test.describe("Auth page", () => {
   })
 
   test("Forgot password link shows the forgot-password view", async ({ page }) => {
-    await page.getByRole("button", { name: /log\s*in/i }).click()
-    await page.getByText(/forgot password/i).click()
-    await expect(page.getByPlaceholder(/your@email\.com/i)).toBeVisible()
-    // The submit button text changes
-    await expect(page.getByRole("button", { name: /send reset/i })).toBeVisible()
+    // Click the forgot password button (text: "Forgot your password?")
+    await page.getByRole("button", { name: /forgot.*password/i }).click()
+
+    // View switches to forgot — button changes to "Send Reset Link"
+    await expect(page.getByRole("button", { name: "Send Reset Link" })).toBeVisible()
+    // Email input shows (placeholder changes in forgot view)
+    await expect(page.locator('input[type="email"]')).toBeVisible()
   })
 
   test("Back link from forgot-password returns to Login tab", async ({ page }) => {
-    await page.getByRole("button", { name: /log\s*in/i }).click()
-    await page.getByText(/forgot password/i).click()
+    await page.getByRole("button", { name: /forgot.*password/i }).click()
+    // Button text is "← Back to Log In"
     await page.getByRole("button", { name: /back to log in/i }).click()
-    await expect(page.getByRole("button", { name: /send reset/i })).not.toBeVisible()
-    await expect(page.getByRole("button", { name: /log\s*in/i })).toBeVisible()
+
+    // Back to main auth view — tabs are visible again
+    await expect(page.getByRole("tab", { name: "Log In" })).toBeVisible()
+    await expect(page.getByRole("tab", { name: "Sign Up" })).toBeVisible()
+    // "Send Reset Link" is gone
+    await expect(page.getByRole("button", { name: "Send Reset Link" })).not.toBeVisible()
   })
 })
 

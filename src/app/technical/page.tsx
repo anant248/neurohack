@@ -230,7 +230,7 @@ export default function TechnicalPage() {
         }
 
         const funcName = getFuncName(question.metaData)
-        const harness = buildPyHarnessClient(code, funcName, testCases)
+        const harness = buildPyHarnessClient(code, funcName, testCases, question.metaData)
 
         try {
           const resultJson = await pyodide.runPythonAsync(harness) as string

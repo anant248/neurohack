@@ -6,47 +6,6 @@ import { motion } from "framer-motion"
 import { AuthButton } from "@/components/auth/AuthButton"
 import "./page.css"
 
-/* ── Floating background shapes ── */
-function ElegantShape({
-  className,
-  delay = 0,
-  width = 400,
-  height = 80,
-  rotate = 0,
-  color = "rgba(16,185,129,0.12)",
-}: {
-  className?: string
-  delay?: number
-  width?: number
-  height?: number
-  rotate?: number
-  color?: string
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -120, rotate: rotate - 12 }}
-      animate={{ opacity: 1, y: 0, rotate }}
-      transition={{ duration: 2.4, delay, ease: [0.23, 0.86, 0.39, 0.96], opacity: { duration: 1.2 } }}
-      className={`absolute pointer-events-none ${className ?? ""}`}
-    >
-      <motion.div
-        animate={{ y: [0, 14, 0] }}
-        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-        style={{ width, height }}
-      >
-        <div
-          style={{
-            position: "absolute", inset: 0, borderRadius: "999px",
-            background: `linear-gradient(135deg, ${color}, transparent)`,
-            border: "1px solid rgba(255,255,255,0.08)",
-            backdropFilter: "blur(2px)",
-          }}
-        />
-      </motion.div>
-    </motion.div>
-  )
-}
-
 /* ── Rotating word in hero heading ── */
 const WORDS = ["Ace", "Prep", "Land", "Crush"]
 

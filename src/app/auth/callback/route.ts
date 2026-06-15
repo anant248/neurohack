@@ -19,6 +19,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  // No code in URL — might be a hash-based recovery link (older Supabase flows).
+  // Let the reset-password page handle it if next points there.
+  if (next === "/auth/reset-password") {
+    return NextResponse.redirect(`${origin}/auth/reset-password`)
+  }
+
   // Exchange failed or no code — redirect to sign-in with error flag
   return NextResponse.redirect(`${origin}/auth?error=oauth_failed`)
 }

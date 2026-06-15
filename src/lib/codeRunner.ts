@@ -215,14 +215,128 @@ print(__json.dumps(__results))
 
 // Pyodide variant: last line is a bare expression so runPythonAsync() captures the value.
 // print() returns None in Python, so we can't use it here.
+//
+// Accepts optional metaDataStr so it can:
+//  1. Inject ListNode/TreeNode class definitions before user code (fixes NameError in
+//     type annotations since Python 3.12 evaluates annotations eagerly)
+//  2. Convert list inputs → node objects before calling, and node outputs → lists for comparison
 export function buildPyHarnessClient(
   code: string,
   funcName: string,
   testCases: TestCase[],
+  metaDataStr?: string,
 ): string {
+  let paramTypes: string[] = []
+  let returnType = "unknown"
+  if (metaDataStr) {
+    try {
+      const meta = JSON.parse(metaDataStr) as MetaData
+      paramTypes = meta.params.map((p) => p.type)
+      returnType = meta.return?.type ?? "unknown"
+    } catch { /* ignore */ }
+  }
+
+  const needsListNode = paramTypes.includes("ListNode") || returnType === "ListNode"
+  const needsTreeNode = paramTypes.includes("TreeNode") || returnType === "TreeNode"
+
+  const listNodeDef = needsListNode ? `
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def _arr_to_listnode(arr):
+    if arr is None:
+        return None
+    dummy = ListNode(0)
+    cur = dummy
+    for v in arr:
+        cur.next = ListNode(v)
+        cur = cur.next
+    return dummy.next
+
+def _listnode_to_arr(head):
+    res = []
+    while head:
+        res.append(head.val)
+        head = head.next
+    return res
+
+` : ""
+
+  const treeNodeDef = needsTreeNode ? `
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def _arr_to_treenode(arr):
+    if not arr:
+        return None
+    from collections import deque as _dq
+    root = TreeNode(arr[0])
+    q = _dq([root])
+    i = 1
+    while q and i < len(arr):
+        node = q.popleft()
+        if i < len(arr) and arr[i] is not None:
+            node.left = TreeNode(arr[i])
+            q.append(node.left)
+        i += 1
+        if i < len(arr) and arr[i] is not None:
+            node.right = TreeNode(arr[i])
+            q.append(node.right)
+        i += 1
+    return root
+
+def _treenode_to_arr(root):
+    if not root:
+        return []
+    from collections import deque as _dq
+    res = []
+    q = _dq([root])
+    while q:
+        node = q.popleft()
+        if node:
+            res.append(node.val)
+            q.append(node.left)
+            q.append(node.right)
+        else:
+            res.append(None)
+    while res and res[-1] is None:
+        res.pop()
+    return res
+
+` : ""
+
+  // Build argument list for the function call, converting nodes where needed
+  const callArgs = paramTypes.length === 0
+    ? `*tc["inputs"]`
+    : paramTypes.map((t, i) => {
+        if (t === "ListNode") return `_arr_to_listnode(tc["inputs"][${i}])`
+        if (t === "TreeNode") return `_arr_to_treenode(tc["inputs"][${i}])`
+        return `tc["inputs"][${i}]`
+      }).join(", ")
+
+  // Build the result normalization snippet (converts node output → list for comparison)
+  let resultSnippet: string
+  if (returnType === "ListNode") {
+    resultSnippet = `        __actual_val = _listnode_to_arr(__actual)
+        __pass = __actual_val == __expected
+        __results.append({"pass": bool(__pass), "actual": str(__actual_val), "expected": str(__expected)})`
+  } else if (returnType === "TreeNode") {
+    resultSnippet = `        __actual_val = _treenode_to_arr(__actual)
+        __pass = __actual_val == __expected
+        __results.append({"pass": bool(__pass), "actual": str(__actual_val), "expected": str(__expected)})`
+  } else {
+    resultSnippet = `        __pass = __actual == __expected
+        __results.append({"pass": bool(__pass), "actual": str(__actual), "expected": str(__expected)})`
+  }
+
   const casesJson = JSON.stringify(testCases).replace(/\\/g, "\\\\").replace(/'/g, "\\'")
   return `import json as __json
-
+${listNodeDef}${treeNodeDef}
 ${code}
 
 # ── auto-injected test harness ──
@@ -230,10 +344,9 @@ __cases = __json.loads('${casesJson}')
 __results = []
 for tc in __cases:
     try:
-        __actual = ${funcName}(*tc["inputs"])
+        __actual = ${funcName}(${callArgs})
         __expected = tc["expected"]
-        __pass = __actual == __expected
-        __results.append({"pass": __pass, "actual": str(__actual), "expected": str(__expected)})
+${resultSnippet}
     except Exception as e:
         __results.append({"pass": False, "actual": f"Error: {e}", "expected": str(tc["expected"])})
 __json.dumps(__results)

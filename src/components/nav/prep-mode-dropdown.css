@@ -1,0 +1,91 @@
+.pmd-wrap {
+  position: relative;
+}
+
+.pmd-trigger {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pmd-trigger:hover,
+.pmd-trigger--open {
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+}
+
+.pmd-chevron {
+  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pmd-trigger--open .pmd-chevron {
+  transform: rotate(180deg);
+}
+
+.pmd-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 16, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 9001;
+  min-width: 280px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  animation: fabSlideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.pmd-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text, white);
+  transition: background 0.15s ease;
+}
+
+.pmd-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.pmd-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pmd-card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 3px;
+}
+
+.pmd-card-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.3;
+}

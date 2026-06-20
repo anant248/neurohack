@@ -37,14 +37,16 @@ body {
   overflow: hidden;
 }
 
-/* Top bar */
+/* Top bar — floating card style */
 .practice-topbar {
   display: flex;
   align-items: center;
-  height: 72px;
+  height: 60px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.5);
+  margin: 12px 24px 0;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 8, 12, 0.88);
   backdrop-filter: blur(20px);
 }
 
@@ -52,10 +54,52 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1400px;
   width: 100%;
-  margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 20px;
+}
+
+.practice-topbar .topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Story Bank row below topbar */
+.bank-access-row {
+  display: flex;
+  padding: 12px 24px 0;
+  flex-shrink: 0;
+}
+
+.bank-access-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bank-access-btn:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.bank-access-count {
+  font-size: 0.72rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-radius: 99px;
+  padding: 1px 7px;
+  font-weight: 700;
 }
 
 .topbar-logo {
@@ -2282,16 +2326,19 @@ body {
     max-height: none;
   }
 
-  /* Topbar inner: tighten horizontal padding on phones */
-  .practice-topbar .topbar-inner {
-    padding: 0 16px;
+  /* Floating topbar: smaller margin on narrow */
+  .practice-topbar {
+    margin: 8px 12px 0;
+  }
+  .bank-access-row {
+    padding: 10px 12px 0;
   }
 }
 
 /* Topbar: hide labels on small screens to prevent overflow */
 @media (max-width: 600px) {
   .practice-topbar {
-    padding: 0 14px;
+    margin: 6px 8px 0;
   }
 
   /* Hide "Interprep" text — keep eye icon only */

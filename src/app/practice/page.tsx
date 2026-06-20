@@ -17,6 +17,7 @@ import { SessionNotes } from "@/components/practice/SessionNotes"
 import { HistoryModal } from "@/components/practice/HistoryModal"
 import { BehavioralBankModal } from "@/components/practice/BehavioralBankModal"
 import { AuthButton } from "@/components/auth/AuthButton"
+import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
 import type { BehavioralPrepResponse } from "@/lib/types"
 import { GENERAL_BEHAVIORAL_QUESTIONS } from "@/lib/generalQuestions"
 import "./styles.css"
@@ -122,21 +123,10 @@ export default function PracticePage() {
           </svg>
           <span>Interprep</span>
         </Link>
+        <div className="topbar-nav">
+          <PrepModeDropdown />
+        </div>
         <div className="topbar-actions">
-          <Link href="/technical" className="nav-link">Technical</Link>
-          <Link href="/coffee-chats" className="nav-link">Coffee Chats</Link>
-          <button className="history-btn" onClick={() => setShowBank(true)} type="button">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H6.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Story Bank
-          </button>
           {history.length > 0 && (
             <button className="history-btn" onClick={() => setShowHistory(true)} type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -155,6 +145,17 @@ export default function PracticePage() {
         </div>
         </div>
       </header>
+
+      {/* ── Story Bank access row ── */}
+      <div className="bank-access-row">
+        <button type="button" className="bank-access-btn" onClick={() => setShowBank(true)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Story Bank
+          {entries.length > 0 && <span className="bank-access-count">{entries.length}</span>}
+        </button>
+      </div>
 
       {/* ── Main content ── */}
       {!session ? (

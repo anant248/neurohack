@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { AuthButton } from "@/components/auth/AuthButton"
+import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
 import { keymap } from "@codemirror/view"
 import { Prec } from "@codemirror/state"
 import { acceptCompletion, closeCompletion, completionStatus } from "@codemirror/autocomplete"
@@ -305,9 +306,10 @@ export default function TechnicalPage() {
             </svg>
             Interprep
           </Link>
+          <div className="topbar-nav">
+            <PrepModeDropdown />
+          </div>
           <div className="topbar-actions">
-            <Link href="/practice" className="nav-link">Behavioural</Link>
-            <Link href="/coffee-chats" className="nav-link">Coffee Chats</Link>
             <AuthButton />
           </div>
         </div>

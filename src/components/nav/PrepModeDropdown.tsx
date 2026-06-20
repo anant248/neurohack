@@ -48,24 +48,27 @@ const MODES = [
 
 export function PrepModeDropdown() {
   const [open, setOpen] = useState(false)
-  const wrapRef = useRef<HTMLDivElement>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    if (!open) return
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false) }
-    function onOutside(e: MouseEvent) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("keydown", onKey)
-    document.addEventListener("mousedown", onOutside)
-    return () => {
-      document.removeEventListener("keydown", onKey)
-      document.removeEventListener("mousedown", onOutside)
-    }
-  }, [open])
+  // Open immediately on hover; close after a short grace period so the cursor
+  // can travel across the gap from the trigger to the panel without flicker.
+  const openNow = () => {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
+    setOpen(true)
+  }
+  const closeSoon = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    closeTimer.current = setTimeout(() => setOpen(false), 120)
+  }
+
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current) }, [])
 
   return (
-    <div className="pmd-wrap" ref={wrapRef}>
+    <div
+      className="pmd-wrap"
+      onMouseEnter={openNow}
+      onMouseLeave={closeSoon}
+    >
       <button
         type="button"
         className={`pmd-trigger${open ? " pmd-trigger--open" : ""}`}
@@ -99,10 +102,8 @@ export function PrepModeDropdown() {
               >
                 {m.icon}
               </div>
-              <div>
-                <div className="pmd-card-title">{m.title}</div>
-                <div className="pmd-card-desc">{m.desc}</div>
-              </div>
+              <div className="pmd-card-title">{m.title}</div>
+              <div className="pmd-card-desc">{m.desc}</div>
             </Link>
           ))}
         </div>

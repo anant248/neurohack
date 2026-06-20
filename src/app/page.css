@@ -20,7 +20,7 @@
   backdrop-filter: blur(20px);
   position: sticky;
   top: 12px;
-  z-index: 100;
+  z-index: 200;
 }
 
 .topbar-inner {
@@ -408,18 +408,6 @@
   box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5);
 }
 
-.cta-btn-ghost {
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.cta-btn-ghost:hover {
-  color: white;
-}
-
 /* ── FAQ section ── */
 .faq-section {
   margin-top: 100px;
@@ -491,17 +479,6 @@
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.7;
   font-size: 0.95rem;
-}
-
-/* ── Footer line ── */
-.landing-footer {
-  margin-top: 64px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  text-align: center;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.28);
-  font-family: monospace;
 }
 
 /* ── Responsive ── */

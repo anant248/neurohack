@@ -114,7 +114,6 @@ function CTASection() {
       </p>
       <div className="cta-actions">
         <Link href="/auth" className="cta-btn-primary">Get started</Link>
-        <Link href="/practice" className="cta-btn-ghost">Try without signing in →</Link>
       </div>
     </section>
   )
@@ -268,9 +267,6 @@ export default function RootPage() {
         <DemoSection />
         <CTASection />
         <FAQSection />
-        <div className="landing-footer">
-          neurohack25.vercel.app &nbsp;·&nbsp; Built with Next.js + Supabase + MediaPipe
-        </div>
       </div>
 
     </div>

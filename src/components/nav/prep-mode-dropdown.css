@@ -109,3 +109,27 @@
   color: rgba(255, 255, 255, 0.45);
   line-height: 1.4;
 }
+
+/* Mobile: the 3-across row overflows a narrow viewport, so stack the cards
+   and constrain the panel to the screen width. */
+@media (max-width: 600px) {
+  .pmd-panel {
+    flex-direction: column;
+    gap: 4px;
+    width: calc(100vw - 24px);
+    max-width: 340px;
+  }
+
+  .pmd-card {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .pmd-card-icon {
+    width: 36px;
+    height: 36px;
+  }
+}

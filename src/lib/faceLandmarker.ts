@@ -11,6 +11,28 @@ import type { FeedbackResult, LandmarkFrame } from "./types"
 
 export type { FeedbackResult, LandmarkFrame }
 
+// MediaPipe's WASM runtime prints benign TFLite/XNNPACK init lines through
+// Emscripten's stderr, which lands on console.error and trips Next.js's dev
+// error overlay. Drop only those exact informational lines, once, and pass
+// everything else through untouched.
+let consoleFiltered = false
+function silenceMediaPipeInfoLogs(): void {
+  if (consoleFiltered || typeof window === "undefined") return
+  consoleFiltered = true
+  const BENIGN = [
+    "Created TensorFlow Lite XNNPACK delegate",
+    "GL version:",
+    "Graph successfully started running",
+  ]
+  const isBenign = (args: unknown[]) =>
+    typeof args[0] === "string" && BENIGN.some(p => (args[0] as string).includes(p))
+  const orig = console.error.bind(console)
+  console.error = (...args: unknown[]) => {
+    if (isBenign(args)) return
+    orig(...args)
+  }
+}
+
 export interface FaceLandmarkerSession {
   readonly ready: Promise<void>
   start(videoEl: HTMLVideoElement, canvasEl: HTMLCanvasElement): Promise<void>
@@ -79,6 +101,7 @@ export function createFaceLandmarkerSession(): FaceLandmarkerSession {
   let landmarkHistory: LandmarkFrame[] = []
 
   const ready = (async () => {
+    silenceMediaPipeInfoLogs()
     const { FilesetResolver, FaceLandmarker } = await import("@mediapipe/tasks-vision")
     const resolver = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL)
     faceLandmarker = await FaceLandmarker.createFromOptions(resolver, {

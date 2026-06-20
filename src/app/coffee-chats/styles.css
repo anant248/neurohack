@@ -723,13 +723,20 @@ body {
   overflow: hidden;
 }
 
+/* Restore list markers — Tailwind Preflight resets list-style to none, which
+   hid the bullets/numbers while leaving the indent (padding) in place. */
 .rich-editor .ProseMirror ul,
 .rich-editor .ProseMirror ol {
   padding-left: 1.4rem;
   margin: 2px 0;
+  list-style-position: outside;
 }
 
+.rich-editor .ProseMirror ul { list-style-type: disc; }
+.rich-editor .ProseMirror ol { list-style-type: decimal; }
+
 .rich-editor .ProseMirror li { margin: 1px 0; }
+.rich-editor .ProseMirror li::marker { color: rgba(255, 255, 255, 0.6); }
 
 .rich-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);

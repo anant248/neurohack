@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { AuthButton } from "@/components/auth/AuthButton"
+import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
 import "./page.css"
 
 /* ── Rotating word in hero heading ── */
@@ -18,29 +19,158 @@ function RotatingWord() {
   }, [idx])
 
   return (
-    /* hidden "Crush" sets the width; rotating spans overlay it */
+    /* hidden "Crush" reserves the width; AnimatePresence swaps the active word */
     <span className="rotating-word-wrap">
       <span className="rotating-word-sizer" aria-hidden="true">Crush</span>
-      {WORDS.map((word, i) => (
+      <AnimatePresence mode="wait">
         <motion.span
-          key={word}
+          key={idx}
           className="rotating-word"
           initial={{ opacity: 0, y: 60 }}
-          animate={i === idx ? { opacity: 1, y: 0 } : { opacity: 0, y: i < idx ? -60 : 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -60 }}
           transition={{ type: "spring", stiffness: 55, damping: 14 }}
         >
-          {word}
+          {WORDS[idx]}
         </motion.span>
-      ))}
+      </AnimatePresence>
     </span>
   )
 }
 
+/* ── Demo showcase section ── */
+const DEMOS = [
+  { id: "coffee-chats", label: "Coffee Chats",  img: "/screenshots/coffee-chats.png" },
+  { id: "practice",     label: "Behavioural",   img: "/screenshots/practice.png" },
+  { id: "technical",    label: "Technical",     img: "/screenshots/technical.png" },
+]
+
+function DemoSection() {
+  const [active, setActive] = useState("coffee-chats")
+  const [imgError, setImgError] = useState<Record<string, boolean>>({})
+  const demo = DEMOS.find(d => d.id === active)!
+
+  return (
+    <section className="demo-section">
+      <p className="demo-eyebrow">See it in action</p>
+      <h2 className="demo-heading">Everything you need to walk in confident</h2>
+      <div className="demo-tabs">
+        {DEMOS.map(d => (
+          <button
+            key={d.id}
+            type="button"
+            className={`demo-tab${active === d.id ? " demo-tab--active" : ""}`}
+            onClick={() => setActive(d.id)}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+      <div className="demo-frame">
+        <div className="demo-chrome">
+          <span className="demo-dot demo-dot--red" />
+          <span className="demo-dot demo-dot--yellow" />
+          <span className="demo-dot demo-dot--green" />
+          <span className="demo-url">neurohack25.vercel.app/{active}</span>
+        </div>
+        <div className="demo-content-wrap">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              className="demo-content"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              {imgError[active] ? (
+                <div className="demo-placeholder">
+                  <p className="demo-placeholder-label">{demo.label}</p>
+                  <p className="demo-placeholder-hint">Screenshot coming soon</p>
+                </div>
+              ) : (
+                <img
+                  src={demo.img}
+                  alt={demo.label}
+                  className="demo-screenshot"
+                  onError={() => setImgError(e => ({ ...e, [active]: true }))}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── CTA section ── */
+function CTASection() {
+  return (
+    <section className="cta-section">
+      <h2 className="cta-heading">Ready to ace your next interview?</h2>
+      <p className="cta-sub">
+        Practice every type of interview question in one place — no account required to start.
+      </p>
+      <div className="cta-actions">
+        <Link href="/auth" className="cta-btn-primary">Get started</Link>
+      </div>
+    </section>
+  )
+}
+
+/* ── FAQ section ── */
+const FAQS = [
+  {
+    q: "Is Interprep free to use?",
+    a: "Yes — all three practice modes are completely free. Sign up to save your session history and STAR stories across devices.",
+  },
+  {
+    q: "Do I need to create an account to practice?",
+    a: "No account needed. All features work immediately in your browser. Sign up only if you want to save your history and sync across devices.",
+  },
+  {
+    q: "How does face tracking work? Is my video recorded?",
+    a: "The Behavioural page uses MediaPipe, a Google AI library that runs entirely in your browser using WebAssembly. No video is ever sent to our servers — all processing happens locally on your device.",
+  },
+  {
+    q: "What coding problems appear on the Technical page?",
+    a: "We pull the official LeetCode Daily Challenge fresh each day. You can code in JavaScript or Python, run test cases in-browser, and get an AI code review powered by Gemini.",
+  },
+]
+
+function FAQSection() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <section className="faq-section">
+      <h2 className="faq-heading">Frequently asked questions</h2>
+      <div className="faq-list">
+        {FAQS.map((item, i) => (
+          <div key={i} className={`faq-item${open === i ? " faq-item--open" : ""}`}>
+            <button
+              type="button"
+              className="faq-trigger"
+              onClick={() => setOpen(open === i ? null : i)}
+            >
+              <span>{item.q}</span>
+              <span className="faq-icon">{open === i ? "−" : "+"}</span>
+            </button>
+            <div className="faq-body">
+              <p>{item.a}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ── fade-up variant for hero elements ── */
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.8, delay: 0.3 + i * 0.15, ease: [0.25, 0.4, 0.25, 1] as const },
+    transition: { duration: 0.8, delay: 0.15 + i * 0.15, ease: [0.25, 0.4, 0.25, 1] as const },
   }),
 }
 
@@ -48,14 +178,17 @@ export default function RootPage() {
   return (
     <div className="landing-layout">
 
-      {/* ── Top bar ── */}
+      {/* ── Floating top bar ── */}
       <header className="landing-topbar">
         <div className="topbar-inner">
-          <div className="topbar-logo">
+          <Link href="/" className="topbar-logo">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor" />
             </svg>
             <span>Interprep</span>
+          </Link>
+          <div className="topbar-nav">
+            <PrepModeDropdown />
           </div>
           <div className="topbar-actions">
             <AuthButton />
@@ -64,29 +197,23 @@ export default function RootPage() {
       </header>
 
       {/* ── Hero ── */}
-      <main className="landing-hero">
+      <section className="landing-hero">
         <div className="hero-content">
-          {/* Badge */}
-          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="hero-badge">
-            <span className="hero-badge-dot" />
-            AI Interview Coach
-          </motion.div>
-
           {/* Heading */}
-          <motion.h1 custom={1} variants={fadeUp} initial="hidden" animate="visible" className="hero-heading">
+          <motion.h1 custom={0} variants={fadeUp} initial="hidden" animate="visible" className="hero-heading">
             <RotatingWord />
             <br />
             <span className="hero-heading-sub">your next interview</span>
           </motion.h1>
 
           {/* Subtitle */}
-          <motion.p custom={2} variants={fadeUp} initial="hidden" animate="visible" className="hero-subtitle">
+          <motion.p custom={1} variants={fadeUp} initial="hidden" animate="visible" className="hero-subtitle">
             Practice behavioral questions with real-time AI coaching, or sharpen your
             coding skills with today&apos;s LeetCode challenge.
           </motion.p>
 
           {/* Mode cards */}
-          <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible" className="mode-cards">
+          <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="mode-cards">
             <Link href="/coffee-chats" className="mode-card" data-testid="coffee-chats-card">
               <div className="mode-card-icon coffee-chats">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -133,7 +260,15 @@ export default function RootPage() {
             </Link>
           </motion.div>
         </div>
-      </main>
+      </section>
+
+      {/* ── Below-fold content ── */}
+      <div className="landing-below">
+        <DemoSection />
+        <CTASection />
+        <FAQSection />
+      </div>
+
     </div>
   )
 }

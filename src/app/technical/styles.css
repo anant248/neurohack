@@ -36,25 +36,33 @@ body {
   overflow: hidden;
 }
 
-/* Top bar */
+/* Top bar — floating card style */
 .technical-topbar {
   display: flex;
   align-items: center;
-  height: 72px;
+  height: 60px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.5);
+  margin: 12px 24px 0;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 8, 12, 0.88);
   backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 200;
 }
 
 .technical-topbar .topbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1400px;
   width: 100%;
-  margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 20px;
+}
+
+.technical-topbar .topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .topbar-logo {
@@ -379,15 +387,26 @@ body {
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Absolute-fill the editor inside so it gets a hard, definite height.
+     With only height:100% the flex height wasn't constraining, so the editor
+     grew to content height and the overflow:hidden wrapper became the scroll
+     container — which the mouse wheel can't scroll (only keyboard cursor moves
+     could, via scrollIntoView). */
+  position: relative;
 }
 
 .editor-wrapper .cm-editor {
+  position: absolute;
+  inset: 0;
   height: 100%;
   font-size: 0.9rem;
 }
 
+/* Now that cm-editor has a bounded height, cm-scroller owns the overflow and
+   the mouse wheel scrolls the code normally. */
 .editor-wrapper .cm-scroller {
   font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  overflow: auto;
 }
 
 /* ==================== ACTION ROW ==================== */
@@ -670,8 +689,8 @@ body {
     min-height: 320px;
   }
 
-  /* Topbar inner: tighten horizontal padding on phones */
-  .technical-topbar .topbar-inner {
-    padding: 0 16px;
+  /* Floating topbar: smaller margin on narrow */
+  .technical-topbar {
+    margin: 8px 12px 0;
   }
 }

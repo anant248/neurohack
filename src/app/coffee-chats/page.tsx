@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCoffeeChats } from "@/hooks/useCoffeeChats"
 import { emptyCoffeeChat } from "@/lib/coffeeChats"
 import { AuthButton } from "@/components/auth/AuthButton"
+import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
 import { ChatEditor } from "@/components/coffee-chats/ChatEditor"
 import type { CoffeeChat } from "@/lib/types"
 import "./styles.css"
@@ -62,9 +63,10 @@ export default function CoffeeChatsPage() {
             </svg>
             <span>Interprep</span>
           </Link>
+          <div className="topbar-nav">
+            <PrepModeDropdown />
+          </div>
           <div className="topbar-actions">
-            <Link href="/practice" className="nav-link">Behavioural</Link>
-            <Link href="/technical" className="nav-link">Technical</Link>
             <AuthButton />
           </div>
         </div>

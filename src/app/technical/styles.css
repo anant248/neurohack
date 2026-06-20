@@ -387,17 +387,23 @@ body {
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Absolute-fill the editor inside so it gets a hard, definite height.
+     With only height:100% the flex height wasn't constraining, so the editor
+     grew to content height and the overflow:hidden wrapper became the scroll
+     container — which the mouse wheel can't scroll (only keyboard cursor moves
+     could, via scrollIntoView). */
+  position: relative;
 }
 
 .editor-wrapper .cm-editor {
+  position: absolute;
+  inset: 0;
   height: 100%;
-  max-height: 100%;
   font-size: 0.9rem;
 }
 
-/* cm-scroller must own the overflow so the mouse wheel scrolls the code;
-   without an explicit overflow the content grows and only keyboard-driven
-   cursor moves scroll the view. */
+/* Now that cm-editor has a bounded height, cm-scroller owns the overflow and
+   the mouse wheel scrolls the code normally. */
 .editor-wrapper .cm-scroller {
   font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
   overflow: auto;

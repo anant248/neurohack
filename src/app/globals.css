@@ -264,6 +264,21 @@ html, body {
   to   { opacity: 1; transform: translateY(0)     scale(1);    }
 }
 
+/* ==================== TOPBAR NAV (Prep Mode) ====================
+   Center the nav (and its dropdown) in the topbar on every page, independent
+   of the logo/actions widths, so the Prep Mode dropdown lines up identically
+   across landing, practice, technical and coffee-chats. */
+.topbar-inner {
+  position: relative;
+}
+
+.topbar-nav {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 /* ==================== FEEDBACK BUBBLE ==================== */
 .fb-bubble {
   position: fixed;

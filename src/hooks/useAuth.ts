@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
+import { reconcileDataOwner } from "@/lib/localData"
 
 export interface AuthState {
   user: User | null
@@ -24,6 +25,7 @@ export function useAuth(): AuthState {
 
     // Hydrate from the current session
     supabase.auth.getUser().then(({ data }) => {
+      reconcileDataOwner(data.user?.id ?? null)
       setUser(data.user)
       setLoading(false)
     })
@@ -32,6 +34,7 @@ export function useAuth(): AuthState {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      reconcileDataOwner(session?.user?.id ?? null)
       setUser(session?.user ?? null)
       setLoading(false)
     })

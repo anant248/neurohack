@@ -1,16 +1,15 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { createClient } from "@/lib/supabase/client"
+import { clearLocalAppData } from "@/lib/localData"
 import { AccountModal } from "./AccountModal"
 
 export function AuthButton() {
   const { user, loading } = useAuth()
   const [open, setOpen] = useState(false)
   const [showAccount, setShowAccount] = useState(false)
-  const router = useRouter()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   // Close on click-outside
@@ -28,7 +27,10 @@ export function AuthButton() {
     setOpen(false)
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.refresh()
+    clearLocalAppData()
+    // Hard navigation to the homepage: wipes all in-memory React state so no
+    // logged-in data (story bank, resume, coffee chats) remains accessible.
+    window.location.href = "/"
   }
 
   if (loading) return <div className="auth-btn-skeleton" aria-hidden />

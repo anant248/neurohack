@@ -70,7 +70,12 @@ export function AuthForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        // Force Google's account chooser every time so a returning user isn't
+        // silently logged back into the previously-used account after sign-out.
+        queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
+      },
     })
     if (error) { setError(error.message); setLoading(null) }
   }

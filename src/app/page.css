@@ -1,15 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ── Root layout: scrollable column ── */
+/* ── Root layout: grows with content; the window is the scroll container, so
+   position:sticky (navbar + demo pin) and framer useScroll both key off the
+   window consistently. ── */
 .landing-layout {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  overflow: visible;
 }
 
-/* ── Floating top bar (sticky inside scroll container) ── */
+/* Other routes (practice/technical/coffee) set `body { overflow:hidden }`,
+   `.site-shell { height:100dvh }` and `.site-content { overflow:hidden }` as
+   global rules. In the App Router that CSS lingers after client navigation and
+   would scroll-lock the homepage on return. These :has() rules out-specify the
+   leaked ones and only apply while the landing layout is mounted, keeping the
+   window scrollable consistently (fresh load and after navigating back). */
+body:has(.landing-layout) {
+  overflow: visible;
+  height: auto;
+}
+.site-shell:has(.landing-layout) {
+  height: auto;
+  min-height: 100dvh;
+}
+.site-content:has(.landing-layout) {
+  overflow: visible;
+}
+
+/* ── Floating top bar (sticky to the window viewport) ── */
 .landing-topbar {
   flex-shrink: 0;
   height: 60px;
@@ -83,7 +103,7 @@
 
 /* Heading */
 .hero-heading {
-  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-size: clamp(3.4rem, 7.6vw, 6.2rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -93,7 +113,7 @@
 
 .hero-heading-sub {
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.55);
+  color: #ffffff;
 }
 
 /* Rotating word container — sized by invisible "Crush" sizer */
@@ -125,10 +145,10 @@
 
 /* Subtitle */
 .hero-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.32rem;
   color: rgba(255, 255, 255, 0.5);
   line-height: 1.7;
-  max-width: 520px;
+  max-width: 600px;
   font-weight: 400;
 }
 
@@ -202,14 +222,14 @@
 }
 
 .mode-card-title {
-  font-size: 0.95rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .mode-card-desc {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.45);
   line-height: 1.4;
 }
@@ -235,129 +255,118 @@
 }
 
 .demo-eyebrow {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--accent-bright, #34d399);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .demo-heading {
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 32px;
+  margin-bottom: 0px;
   color: white;
 }
 
-.demo-tabs {
-  display: inline-flex;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 24px;
-}
-
-.demo-tab {
-  padding: 8px 20px;
-  background: transparent;
-  border: none;
-  border-radius: 9px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.88rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.demo-tab--active {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.demo-tab:hover:not(.demo-tab--active) {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.demo-frame {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.02);
-  text-align: left;
-}
-
-.demo-chrome {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.demo-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.demo-dot--red    { background: #ff5f57; }
-.demo-dot--yellow { background: #ffbd2e; }
-.demo-dot--green  { background: #28c840; }
-
-.demo-url {
-  margin-left: 8px;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
-  font-family: monospace;
-}
-
-.demo-content-wrap {
+/* Scroll-pinned stack: the tall outer (.demo-pin) provides scroll distance;
+   the inner pins to the viewport so the page appears "held" while each card
+   slides up to overlay the previous one (driven by scroll progress in JS).
+   Releases into normal scroll once the outer is fully scrolled. */
+.demo-pin {
   position: relative;
-  width: 100%;
+  height: 300vh;            /* 3 cards → 2 transitions of ~100vh each */
+}
+
+.demo-pin-inner {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow: hidden;
-}
-
-.demo-content {
-  width: 100%;
-}
-
-.demo-screenshot {
-  width: 100%;
-  display: block;
-  border-radius: 0 0 14px 14px;
-}
-
-.demo-placeholder {
-  min-height: 400px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.02);
 }
 
-.demo-placeholder-label {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+.demo-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;     /* keep the card near the top of the pinned frame */
+  justify-content: center;
+  padding: 0px 24px;        /* clears the floating navbar; sits close to the heading */
+  will-change: transform;
 }
 
-.demo-placeholder-hint {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.2);
+.demo-card-inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 44px;
+  align-items: center;
+  width: 100%;
+  max-width: 1320px;        /* ~50% wider than the old 912px content box */
+  text-align: left;
+  background: #0b0b12;      /* fully opaque — no background text bleeding through */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  padding: 15px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.demo-card-media {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #000;
+}
+
+.demo-card-video {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #000;
+}
+
+.demo-card-text {
+  padding: 8px 24px;
+}
+
+.demo-card-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: white;
+  margin-bottom: 18px;
+}
+
+.demo-card-desc {
+  font-size: 1.22rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Static fallback (mobile / reduced motion): plain vertical list, no pinning. */
+.demo-pin--static { height: auto; }
+.demo-pin--static .demo-pin-inner {
+  position: static;
+  height: auto;
+  overflow: visible;
+  flex-direction: column;
+  gap: 24px;
+}
+.demo-pin--static .demo-card {
+  position: relative;
+  inset: auto;
+  padding: 0;
 }
 
 /* ── CTA section ── */
 .cta-section {
-  margin-top: 100px;
+  margin-top: 25px;
   text-align: center;
   padding: 64px 40px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -366,18 +375,18 @@
 }
 
 .cta-heading {
-  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   color: white;
 }
 
 .cta-sub {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1.65;
-  max-width: 480px;
+  max-width: 560px;
   margin: 0 auto 32px;
 }
 
@@ -390,10 +399,10 @@
 }
 
 .cta-btn-primary {
-  padding: 13px 30px;
+  padding: 15px 34px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
   border-radius: 12px;
   text-decoration: none;
@@ -413,7 +422,7 @@
 }
 
 .faq-heading {
-  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   text-align: center;
@@ -439,7 +448,7 @@
   background: none;
   border: none;
   color: var(--text, white);
-  font-size: 1rem;
+  font-size: 1.18rem;
   font-weight: 500;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -470,14 +479,14 @@
 }
 
 .faq-item--open .faq-body {
-  max-height: 300px;
+  max-height: 400px;
   padding-bottom: 22px;
 }
 
 .faq-body p {
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.7;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
 }
 
 /* ── Responsive ── */
@@ -485,6 +494,42 @@
   .mode-cards { grid-template-columns: 1fr; max-width: 100%; }
   .landing-topbar { margin: 8px 12px 0; }
   .cta-section { padding: 40px 20px; }
+
+  /* Pinning/overlap is cramped on small screens — force a normal vertical list
+     (this matches the .demo-pin--static the JS applies; CSS guards before JS
+     runs and binds the transform). Videos still play when scrolled into view. */
+  .demo-pin { height: auto; }
+  .demo-pin-inner {
+    position: static;
+    height: auto;
+    overflow: visible;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .demo-card {
+    position: relative;
+    inset: auto;
+    padding: 0;
+  }
+  .demo-card-inner {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .demo-card-text { padding: 0 4px; }
+}
+
+/* Respect reduced-motion: no pin / scroll-jacking feel. */
+@media (prefers-reduced-motion: reduce) {
+  .demo-pin { height: auto; }
+  .demo-pin-inner {
+    position: static;
+    height: auto;
+    overflow: visible;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .demo-card { position: relative; inset: auto; padding: 0; }
 }
 
 @media (max-width: 600px) {

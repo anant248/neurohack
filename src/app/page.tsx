@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
+import Lenis from "lenis"
 import { AuthButton } from "@/components/auth/AuthButton"
 import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
 import "./page.css"
@@ -38,66 +39,144 @@ function RotatingWord() {
   )
 }
 
-/* ── Demo showcase section ── */
+/* ── Demo showcase section — scroll-stacking video cards ── */
 const DEMOS = [
-  { id: "coffee-chats", label: "Coffee Chats",  img: "/screenshots/coffee-chats.png" },
-  { id: "practice",     label: "Behavioural",   img: "/screenshots/practice.png" },
-  { id: "technical",    label: "Technical",     img: "/screenshots/technical.png" },
+  {
+    id: "coffee-chats",
+    video: "/videos/coffee-chats.mp4",
+    poster: "/screenshots/coffee-chats.png",
+    title: "Show up prepared for every coffee chat",
+    desc: "Keep networking notes, prep tailored questions, and track follow-ups so every conversation moves you forward.",
+  },
+  {
+    id: "behavioural",
+    video: "/videos/behavioural.mp4",
+    poster: "/screenshots/practice.png",
+    title: "Questions tailored to the role, with instant feedback",
+    desc: "Answer on camera while AI scores your eye contact and expression, then get specific feedback to improve.",
+  },
+  {
+    id: "technical",
+    video: "/videos/technical.mp4",
+    poster: "/screenshots/technical.png",
+    title: "Daily coding practice in Python or JavaScript",
+    desc: "Solve the daily LeetCode in an in-browser editor, run tests, and get an AI code review.",
+  },
 ]
 
+function DemoCard({
+  demo,
+  index,
+  count,
+  progress,
+  pinned,
+  setVideoRef,
+}: {
+  demo: (typeof DEMOS)[number]
+  index: number
+  count: number
+  progress: MotionValue<number>
+  pinned: boolean
+  setVideoRef: (el: HTMLVideoElement | null) => void
+}) {
+  // Card 0 is the base layer; each later card slides up from below the frame
+  // (y: 100% → 0%) as scroll progress crosses its segment, overlaying the one
+  // before it. Hooks run unconditionally; the transform is only bound to the
+  // style when pinning is active.
+  const segStart = (index - 1) / (count - 1)
+  const segEnd = index / (count - 1)
+  const y = useTransform(
+    progress,
+    index === 0 ? [0, 1] : [segStart, segEnd],
+    index === 0 ? ["0%", "0%"] : ["100%", "0%"],
+  )
+
+  return (
+    <motion.article className="demo-card" style={pinned ? { y, zIndex: index } : undefined}>
+      <div className="demo-card-inner">
+        <div className="demo-card-media">
+          <video
+            ref={setVideoRef}
+            className="demo-card-video"
+            src={demo.video}
+            poster={demo.poster}
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
+        </div>
+        <div className="demo-card-text">
+          <h3 className="demo-card-title">{demo.title}</h3>
+          <p className="demo-card-desc">{demo.desc}</p>
+        </div>
+      </div>
+    </motion.article>
+  )
+}
+
 function DemoSection() {
-  const [active, setActive] = useState("coffee-chats")
-  const [imgError, setImgError] = useState<Record<string, boolean>>({})
-  const demo = DEMOS.find(d => d.id === active)!
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+  const [active, setActive] = useState(0)
+  const [pinned, setPinned] = useState(true)
+  const N = DEMOS.length
+
+  // Progress of scrolling through the tall outer (0 = section top at viewport
+  // top, 1 = section bottom at viewport bottom). The inner is sticky, so the
+  // page appears "held" while the cards animate by this progress.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  })
+
+  // Disable scroll-pinning on small screens / reduced-motion — fall back to a
+  // normal vertical list.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 760px), (prefers-reduced-motion: reduce)")
+    const update = () => setPinned(!mq.matches)
+    update()
+    mq.addEventListener("change", update)
+    return () => mq.removeEventListener("change", update)
+  }, [])
+
+  // Front-most card from scroll progress → play only that video, pause others.
+  useMotionValueEvent(scrollYProgress, "change", v => {
+    const idx = Math.min(N - 1, Math.max(0, Math.round(v * (N - 1))))
+    setActive(prev => (prev === idx ? prev : idx))
+  })
+
+  useEffect(() => {
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return
+      if (i === active) {
+        const p = v.play()
+        if (p) p.catch(() => {})
+      } else {
+        v.pause()
+      }
+    })
+  }, [active])
 
   return (
     <section className="demo-section">
-      <p className="demo-eyebrow">See it in action</p>
-      <h2 className="demo-heading">Everything you need to walk in confident</h2>
-      <div className="demo-tabs">
-        {DEMOS.map(d => (
-          <button
-            key={d.id}
-            type="button"
-            className={`demo-tab${active === d.id ? " demo-tab--active" : ""}`}
-            onClick={() => setActive(d.id)}
-          >
-            {d.label}
-          </button>
-        ))}
-      </div>
-      <div className="demo-frame">
-        <div className="demo-chrome">
-          <span className="demo-dot demo-dot--red" />
-          <span className="demo-dot demo-dot--yellow" />
-          <span className="demo-dot demo-dot--green" />
-          <span className="demo-url">neurohack25.vercel.app/{active}</span>
-        </div>
-        <div className="demo-content-wrap">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              className="demo-content"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-            >
-              {imgError[active] ? (
-                <div className="demo-placeholder">
-                  <p className="demo-placeholder-label">{demo.label}</p>
-                  <p className="demo-placeholder-hint">Screenshot coming soon</p>
-                </div>
-              ) : (
-                <img
-                  src={demo.img}
-                  alt={demo.label}
-                  className="demo-screenshot"
-                  onError={() => setImgError(e => ({ ...e, [active]: true }))}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+      <Reveal className="demo-header">
+        <p className="demo-eyebrow">See it in action</p>
+        <h2 className="demo-heading">Everything you need to walk in confident</h2>
+      </Reveal>
+      <div className={`demo-pin${pinned ? "" : " demo-pin--static"}`} ref={sectionRef}>
+        <div className="demo-pin-inner">
+          {DEMOS.map((d, i) => (
+            <DemoCard
+              key={d.id}
+              demo={d}
+              index={i}
+              count={N}
+              progress={scrollYProgress}
+              pinned={pinned}
+              setVideoRef={el => { videoRefs.current[i] = el }}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -107,23 +186,29 @@ function DemoSection() {
 /* ── CTA section ── */
 function CTASection() {
   return (
-    <section className="cta-section">
+    <motion.section
+      className="cta-section"
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-12% 0px" }}
+      transition={{ duration: 0.7, ease: [0.25, 0.4, 0.25, 1] }}
+    >
       <h2 className="cta-heading">Ready to ace your next interview?</h2>
       <p className="cta-sub">
-        Practice every type of interview question in one place — no account required to start.
+        Practice every type of interview question in one place. No account needed to get started.
       </p>
       <div className="cta-actions">
         <Link href="/auth" className="cta-btn-primary">Get started</Link>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
 /* ── FAQ section ── */
 const FAQS = [
   {
-    q: "Is Interprep free to use?",
-    a: "Yes — all three practice modes are completely free. Sign up to save your session history and STAR stories across devices.",
+    q: "Is Interprep really free?",
+    a: "Yes, all three practice modes are completely free.",
   },
   {
     q: "Do I need to create an account to practice?",
@@ -131,7 +216,7 @@ const FAQS = [
   },
   {
     q: "How does face tracking work? Is my video recorded?",
-    a: "The Behavioural page uses MediaPipe, a Google AI library that runs entirely in your browser using WebAssembly. No video is ever sent to our servers — all processing happens locally on your device.",
+    a: "The Behavioural page uses MediaPipe, a Google AI library that runs entirely in your browser using WebAssembly. No video is ever sent to our servers and all processing happens locally on your device.",
   },
   {
     q: "What coding problems appear on the Technical page?",
@@ -143,10 +228,19 @@ function FAQSection() {
   const [open, setOpen] = useState<number | null>(null)
   return (
     <section className="faq-section">
-      <h2 className="faq-heading">Frequently asked questions</h2>
+      <Reveal>
+        <h2 className="faq-heading">Questions? We&apos;ve got answers.</h2>
+      </Reveal>
       <div className="faq-list">
         {FAQS.map((item, i) => (
-          <div key={i} className={`faq-item${open === i ? " faq-item--open" : ""}`}>
+          <motion.div
+            key={i}
+            className={`faq-item${open === i ? " faq-item--open" : ""}`}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-8% 0px" }}
+            transition={{ duration: 0.5, delay: i * 0.14, ease: [0.25, 0.4, 0.25, 1] }}
+          >
             <button
               type="button"
               className="faq-trigger"
@@ -158,7 +252,7 @@ function FAQSection() {
             <div className="faq-body">
               <p>{item.a}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>
@@ -174,7 +268,42 @@ const fadeUp = {
   }),
 }
 
+/* ── Scroll-reveal wrapper: fades a section up the first time it enters view ── */
+function Reveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-12% 0px" }}
+      transition={{ duration: 0.7, ease: [0.25, 0.4, 0.25, 1], delay }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export default function RootPage() {
+  useEffect(() => {
+    // Momentum smooth-scroll — the "recoil" easing where the page glides to a
+    // stop. Lenis animates real scroll position, so the demo pin (position:
+    // sticky + useScroll) keeps working. Skipped under reduced-motion. The
+    // homepage scrolls on the window; the :has() rules in page.css keep the
+    // shell scrollable even after another route's global overflow CSS lingers.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    const lenis = new Lenis({ lerp: 0.085, smoothWheel: true })
+    let raf = 0
+    const loop = (time: number) => {
+      lenis.raf(time)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => {
+      cancelAnimationFrame(raf)
+      lenis.destroy()
+    }
+  }, [])
+
   return (
     <div className="landing-layout">
 
@@ -263,8 +392,8 @@ export default function RootPage() {
       </section>
 
       {/* ── Below-fold content ── */}
+      <DemoSection />
       <div className="landing-below">
-        <DemoSection />
         <CTASection />
         <FAQSection />
       </div>

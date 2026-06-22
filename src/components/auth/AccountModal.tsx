@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
+import { clearLocalAppData } from "@/lib/localData"
 import "./account-modal.css"
 
 interface AccountModalProps {
@@ -122,8 +123,8 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
   // ── Sign out ──────────────────────────────────────────────────────────────
   const signOut = async () => {
     await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+    clearLocalAppData()
+    window.location.href = "/"
   }
 
   // ── Delete account ────────────────────────────────────────────────────────
@@ -136,8 +137,8 @@ export function AccountModal({ user, onClose }: AccountModalProps) {
       return
     }
     await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+    clearLocalAppData()
+    window.location.href = "/"
   }
 
   return createPortal(

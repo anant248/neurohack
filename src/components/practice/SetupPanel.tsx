@@ -97,7 +97,7 @@ export function SetupPanel({ resumeText, onResumeChange, onGenerate, onPracticeG
       <div className="setup-section">
         <label className="setup-label" htmlFor="resume-input">
           Your Resume
-          <span className="setup-label-hint">Paste your master resume — saved for future sessions</span>
+          <span className="setup-label-hint">Paste your master resume - only stored locally in your browser</span>
         </label>
         <textarea
           id="resume-input"

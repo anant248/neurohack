@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, type MotionValue } from "framer-motion"
 import Lenis from "lenis"
 import { AuthButton } from "@/components/auth/AuthButton"
 import { PrepModeDropdown } from "@/components/nav/PrepModeDropdown"
+import { createClient } from "@/lib/supabase/client"
 import "./page.css"
 
 /* ── Rotating word in hero heading ── */
@@ -185,6 +187,21 @@ function DemoSection() {
 
 /* ── CTA section ── */
 function CTASection() {
+  const router = useRouter()
+
+  // Route instantly using the locally-cached session (no network round-trip):
+  // signed-in users skip straight to practice, everyone else to sign-in. The
+  // href stays /auth for prefetch + no-JS fallback.
+  const handleGetStarted = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    try {
+      const { data } = await createClient().auth.getSession()
+      router.push(data.session ? "/practice" : "/auth")
+    } catch {
+      router.push("/auth")
+    }
+  }
+
   return (
     <motion.section
       className="cta-section"
@@ -198,7 +215,7 @@ function CTASection() {
         Practice every type of interview question in one place. No account needed to get started.
       </p>
       <div className="cta-actions">
-        <Link href="/auth" className="cta-btn-primary">Get started</Link>
+        <Link href="/auth" className="cta-btn-primary" onClick={handleGetStarted}>Get started</Link>
       </div>
     </motion.section>
   )

@@ -27,6 +27,8 @@ export default [
     },
   },
   {
-    ignores: [".next/**", "node_modules/**", "playwright-report/**", "test-results/**"],
+    // scripts/** are one-off Node dev tools (CommonJS, Node globals) — not part
+    // of the app build, so they're excluded from the browser-oriented lint.
+    ignores: [".next/**", "node_modules/**", "playwright-report/**", "test-results/**", "scripts/**"],
   },
 ]

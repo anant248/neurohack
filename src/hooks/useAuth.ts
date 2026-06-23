@@ -23,10 +23,12 @@ export function useAuth(): AuthState {
 
     const supabase = createClient()
 
-    // Hydrate from the current session
-    supabase.auth.getUser().then(({ data }) => {
-      reconcileDataOwner(data.user?.id ?? null)
-      setUser(data.user)
+    // Hydrate from the locally-cached session (no network round-trip) so the
+    // avatar/menu render instantly on every page. This is display-only; server
+    // middleware and route handlers still validate the token for data access.
+    supabase.auth.getSession().then(({ data }) => {
+      reconcileDataOwner(data.session?.user?.id ?? null)
+      setUser(data.session?.user ?? null)
       setLoading(false)
     })
 

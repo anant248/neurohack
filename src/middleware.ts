@@ -39,7 +39,10 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
 
 export const config = {
   matcher: [
-    // Run on all routes except static files and Next.js internals
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Run on all routes except Next.js internals and static assets. Media and
+    // font extensions are excluded so they never trigger a network getUser() —
+    // critical for video range-requests, which would otherwise fire an auth
+    // call per chunk and stall playback.
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm|mov|ogg|mp3|woff|woff2|ttf|otf)$).*)",
   ],
 }

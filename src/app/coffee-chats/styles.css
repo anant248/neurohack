@@ -139,6 +139,27 @@ body {
 .chat-list::-webkit-scrollbar-track { background: transparent; }
 .chat-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
+/* Loading spinner while saved chats are being fetched */
+.chat-list-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.chat-list-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #f59e0b;
+  animation: chat-list-spin 0.8s linear infinite;
+}
+
+@keyframes chat-list-spin {
+  to { transform: rotate(360deg); }
+}
+
 .chat-list-item {
   display: flex;
   flex-direction: column;

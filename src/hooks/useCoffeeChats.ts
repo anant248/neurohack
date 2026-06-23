@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import type { CoffeeChat, CoffeeChatQuestion, CoffeeChatTodo } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
+import { hasActiveSession } from "@/lib/supabase/client"
 
 const STORAGE_KEY = "interprep-coffee-chats"
 
@@ -47,23 +48,41 @@ function remoteToLocal(r: Record<string, unknown>): CoffeeChat {
 
 export function useCoffeeChats() {
   const [chats, setChats] = useState<CoffeeChat[]>([])
+  const [loading, setLoading] = useState(FLAGS.SUPABASE_PERSISTENCE)
   const isAuthRef = useRef(false)
 
   useEffect(() => {
     setChats(loadFromStorage())
 
-    if (FLAGS.SUPABASE_PERSISTENCE) {
-      fetch("/api/coffee-chats")
-        .then(r => (r.ok ? r.json() : { chats: [], authenticated: false }))
-        .then(({ chats: remote, authenticated }: { chats: Array<Record<string, unknown>>; authenticated?: boolean }) => {
-          if (!authenticated) return
-          isAuthRef.current = true
-          const mapped = remote.map(remoteToLocal)
-          setChats(mapped)
-          saveToStorage(mapped)
-        })
-        .catch(err => console.error("[useCoffeeChats] Failed to load:", err))
+    if (!FLAGS.SUPABASE_PERSISTENCE) {
+      setLoading(false)
+      return
     }
+
+    let cancelled = false
+    ;(async () => {
+      // Skip the API call entirely for signed-out/guest users.
+      if (!(await hasActiveSession())) {
+        if (!cancelled) setLoading(false)
+        return
+      }
+      try {
+        const r = await fetch("/api/coffee-chats")
+        const { chats: remote, authenticated }: { chats: Array<Record<string, unknown>>; authenticated?: boolean } =
+          r.ok ? await r.json() : { chats: [], authenticated: false }
+        if (cancelled || !authenticated) return
+        isAuthRef.current = true
+        const mapped = remote.map(remoteToLocal)
+        setChats(mapped)
+        saveToStorage(mapped)
+      } catch (err) {
+        console.error("[useCoffeeChats] Failed to load:", err)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+
+    return () => { cancelled = true }
   }, [])
 
   const addChat = useCallback(
@@ -133,5 +152,5 @@ export function useCoffeeChats() {
     }
   }, [])
 
-  return { chats, addChat, updateChat, deleteChat }
+  return { chats, loading, addChat, updateChat, deleteChat }
 }

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import type { BehavioralBankEntry } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
+import { hasActiveSession } from "@/lib/supabase/client"
 
 const STORAGE_KEY = "interprep-behavioral-bank"
 
@@ -36,27 +37,36 @@ export function useBehavioralBank() {
   useEffect(() => {
     setEntries(loadFromStorage())
 
-    if (FLAGS.SUPABASE_PERSISTENCE) {
-      fetch("/api/behavioral-bank")
-        .then(r => (r.ok ? r.json() : { entries: [], authenticated: false }))
-        .then(({ entries: remote, authenticated }: { entries: Array<Record<string, unknown>>; authenticated?: boolean }) => {
-          if (!authenticated) return
-          isAuthRef.current = true
-          const mapped: BehavioralBankEntry[] = remote.map(e => ({
-            id: e.id as string,
-            title: e.title as string,
-            situation: (e.situation as string) ?? "",
-            task: (e.task as string) ?? "",
-            action: (e.action as string) ?? "",
-            result: (e.result as string) ?? "",
-            tags: (e.tags as string[]) ?? [],
-            createdAt: new Date(e.created_at as string),
-          }))
-          setEntries(mapped)
-          saveToStorage(mapped)
-        })
-        .catch(err => console.error("[useBehavioralBank] Failed to load:", err))
-    }
+    if (!FLAGS.SUPABASE_PERSISTENCE) return
+
+    let cancelled = false
+    ;(async () => {
+      // Skip the API call entirely for signed-out/guest users.
+      if (!(await hasActiveSession())) return
+      try {
+        const r = await fetch("/api/behavioral-bank")
+        const { entries: remote, authenticated }: { entries: Array<Record<string, unknown>>; authenticated?: boolean } =
+          r.ok ? await r.json() : { entries: [], authenticated: false }
+        if (cancelled || !authenticated) return
+        isAuthRef.current = true
+        const mapped: BehavioralBankEntry[] = remote.map(e => ({
+          id: e.id as string,
+          title: e.title as string,
+          situation: (e.situation as string) ?? "",
+          task: (e.task as string) ?? "",
+          action: (e.action as string) ?? "",
+          result: (e.result as string) ?? "",
+          tags: (e.tags as string[]) ?? [],
+          createdAt: new Date(e.created_at as string),
+        }))
+        setEntries(mapped)
+        saveToStorage(mapped)
+      } catch (err) {
+        console.error("[useBehavioralBank] Failed to load:", err)
+      }
+    })()
+
+    return () => { cancelled = true }
   }, [])
 
   const addEntry = useCallback(

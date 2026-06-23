@@ -21,3 +21,6 @@ out/
 # Playwright
 playwright-report/
 test-results/
+
+# Re-encode backups of demo videos (not deployed)
+/public/videos/_originals/

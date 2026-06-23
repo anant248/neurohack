@@ -8,3 +8,18 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
 }
+
+/**
+ * Reads the locally-cached session (no network) to decide whether a remote
+ * fetch is worth making. Lets data hooks skip their API call entirely for
+ * signed-out/guest users — which would otherwise waste a round-trip plus the
+ * middleware + route-handler getUser() calls.
+ */
+export async function hasActiveSession(): Promise<boolean> {
+  try {
+    const { data } = await createClient().auth.getSession()
+    return !!data.session
+  } catch {
+    return false
+  }
+}

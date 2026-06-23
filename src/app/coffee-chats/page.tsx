@@ -21,7 +21,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function CoffeeChatsPage() {
-  const { chats, addChat, updateChat, deleteChat } = useCoffeeChats()
+  const { chats, loading, addChat, updateChat, deleteChat } = useCoffeeChats()
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
 
   const activeChat = chats.find(c => c.id === activeChatId) ?? null
@@ -87,7 +87,11 @@ export default function CoffeeChatsPage() {
           </div>
 
           <div className="chat-list">
-            {chats.length === 0 ? (
+            {loading && chats.length === 0 ? (
+              <div className="chat-list-loading">
+                <span className="chat-list-spinner" />
+              </div>
+            ) : chats.length === 0 ? (
               <div className="chat-list-empty">
                 <p className="chat-list-empty-title">No chats yet</p>
                 <p className="chat-list-empty-sub">Click &ldquo;New&rdquo; to log your first coffee chat.</p>

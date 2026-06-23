@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react"
 import type { SessionScore } from "@/lib/types"
 import { FLAGS } from "@/lib/flags"
+import { hasActiveSession } from "@/lib/supabase/client"
 
 export interface AddSessionInput {
   question: string
@@ -20,13 +21,18 @@ export interface AddSessionInput {
 export function useSessionHistory() {
   const [history, setHistory] = useState<SessionScore[]>([])
 
-  // ── Load persisted history when flag is on ──
+  // ── Load persisted history when flag is on (and the user is signed in) ──
   useEffect(() => {
     if (!FLAGS.SUPABASE_PERSISTENCE) return
 
-    fetch("/api/sessions")
-      .then(r => (r.ok ? r.json() : { sessions: [] }))
-      .then(({ sessions }) => {
+    let cancelled = false
+    ;(async () => {
+      // Skip the API call entirely for signed-out/guest users.
+      if (!(await hasActiveSession())) return
+      try {
+        const r = await fetch("/api/sessions")
+        const { sessions } = r.ok ? await r.json() : { sessions: [] }
+        if (cancelled) return
         const loaded: SessionScore[] = (
           sessions as Array<{
             eye_contact_score: number
@@ -40,8 +46,12 @@ export function useSessionHistory() {
           timestamp: new Date(s.created_at),
         }))
         setHistory(loaded)
-      })
-      .catch(err => console.error("[useSessionHistory] Failed to load sessions:", err))
+      } catch (err) {
+        console.error("[useSessionHistory] Failed to load sessions:", err)
+      }
+    })()
+
+    return () => { cancelled = true }
   }, [])
 
   const addSession = useCallback((input: AddSessionInput) => {

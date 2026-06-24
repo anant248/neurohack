@@ -75,6 +75,13 @@ Interprep is a full-stack interview preparation platform built for the [NeuroHac
 - In-browser code editor (CodeMirror 6) with JavaScript and Python support
 - Run code, fetch LeetCode problems, and get AI code review — all without leaving the page
 
+**Coffee Chats (`/coffee-chats`)**
+- Plan and run informational interviews and networking conversations — log a chat per contact with their **name, company, role, date, and format** (virtual or in-person)
+- Build your question list from a curated **suggested-questions** library or add your own custom questions
+- Take **rich-text notes** under each question during the chat (TipTap editor — bold, lists, highlights, links)
+- Track a **sticky to-do / follow-up checklist** alongside the conversation, and **generate AI follow-up to-dos** from your notes with Gemini
+- Everything is saved to your account so each conversation is there when you come back
+
 **Everything else**
 - Google and GitHub OAuth via Supabase — sign in or use the app anonymously
 - Behavioural Story Bank: save and manage your own STAR stories for quick reference during sessions
@@ -102,8 +109,11 @@ Interprep is a full-stack interview preparation platform built for the [NeuroHac
 | Vision | MediaPipe Tasks Vision (face landmark detection, runs fully in-browser) |
 | Auth & DB | Supabase (Google + GitHub OAuth, PostgreSQL) |
 | Code Editor | CodeMirror 6 via `@uiw/react-codemirror` |
+| Rich-text Editor | TipTap 3 (coffee-chat notes) |
 | Charts | Chart.js 4 |
-| Animation | Framer Motion |
+| Animation | Framer Motion, Lenis (smooth scroll) |
+| Icons | lucide-react |
+| Validation | Zod |
 | Testing | Playwright (E2E), Vitest (unit) |
 | Deployment | Vercel |
 
@@ -180,6 +190,14 @@ Interprep is a full-stack interview preparation platform built for the [NeuroHac
 4. Use the **AI Code Review** button for Gemini-powered feedback on your solution
 5. Fetch a LeetCode problem directly from the sidebar to practise on real interview questions
 
+**Coffee Chats**
+1. Navigate to `/coffee-chats`
+2. Click **New** to create a chat, then fill in the contact's name, company, role, date, and format (virtual or in-person)
+3. Add questions from the **suggested-questions** list or type your own
+4. During (or after) the conversation, take **rich-text notes** under each question
+5. Track follow-ups in the **to-dos** panel, or click **Generate to-dos** to have Gemini suggest follow-up actions from your notes
+6. Chats are saved to your account automatically — sign in to keep them across devices
+
 <!-- 📸 IMAGE PLACEHOLDER: add usage GIFs or additional screenshots at images/usage-behavioral.gif and images/usage-technical.gif -->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -194,21 +212,29 @@ neurohack/
 ├── src/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── auth/delete-account/ # POST — delete the signed-in user's account
 │   │   │   ├── behavioral-prep/     # POST — Gemini question generation
-│   │   │   ├── behavioral-bank/     # GET, POST, PATCH, DELETE — story bank CRUD
+│   │   │   ├── behavioral-bank/     # GET, POST + [id] — STAR story bank CRUD
+│   │   │   ├── coffee-chats/        # GET, POST + [id] — coffee-chat CRUD
+│   │   │   │   └── generate-todos/  # POST — Gemini follow-up to-do generation
 │   │   │   ├── feedback/            # POST — Gemini coaching from face scores
 │   │   │   ├── sessions/            # GET, POST, DELETE — practice session history
-│   │   │   ├── prep-sessions/       # POST, PATCH — session notes persistence
+│   │   │   ├── prep-sessions/       # POST + [id]/notes — session notes persistence
 │   │   │   ├── code-review/         # POST — Gemini code review
 │   │   │   ├── run-code/            # POST — in-browser code execution
 │   │   │   ├── fetch-jd/            # POST — job description scraper
 │   │   │   ├── leetcode/            # GET — LeetCode problem fetcher
 │   │   │   └── submit-feedback/     # POST — user feedback submission
-│   │   ├── auth/                    # OAuth callback + sign-in page
-│   │   ├── practice/                # Behavioural interview page
-│   │   ├── technical/               # Coding practice page
+│   │   ├── auth/                    # Sign-in page, OAuth callback, reset-password
+│   │   ├── practice/                # Behavioural interview page (+ loading.tsx)
+│   │   ├── technical/               # Coding practice page (+ loading.tsx)
+│   │   ├── coffee-chats/            # Coffee-chat tracker page (+ loading.tsx, styles.css)
+│   │   ├── facelandmarker/          # MediaPipe debug/demo page
 │   │   ├── layout.tsx               # Root layout (aurora bg, footer, shell)
-│   │   └── page.tsx                 # Landing page
+│   │   ├── page.tsx                 # Landing page
+│   │   ├── page.css / globals.css   # Landing + global styles
+│   │   └── ...                      # favicon, etc.
+│   ├── middleware.ts                # Supabase session refresh on each request
 │   ├── components/
 │   │   ├── practice/
 │   │   │   ├── VideoCapture.tsx     # Camera feed, countdown, analysis mode toggle
@@ -219,28 +245,47 @@ neurohack/
 │   │   │   ├── BehavioralBankModal.tsx  # STAR story manager
 │   │   │   ├── CompanyCard.tsx      # Company context card
 │   │   │   └── SessionNotes.tsx     # Per-session notes
-│   │   ├── auth/                    # AuthButton, AuthForm
+│   │   ├── coffee-chats/
+│   │   │   ├── ChatEditor.tsx       # Single coffee-chat editor (contact + questions)
+│   │   │   ├── QuestionEditor.tsx   # Per-question rich-text notes
+│   │   │   ├── RichToolbar.tsx      # TipTap formatting toolbar
+│   │   │   └── StickyTodos.tsx      # Follow-up to-do checklist
+│   │   ├── nav/                     # PrepModeDropdown (mode switcher) + styles
+│   │   ├── auth/                    # AuthButton, AuthForm, AccountModal
 │   │   ├── ui/                      # Button, Card, Modal primitives
 │   │   ├── FeedbackBubble.tsx       # Floating in-app feedback widget
+│   │   ├── PageLoading.tsx          # Shared route-loading spinner
 │   │   └── Footer.tsx
 │   ├── hooks/
 │   │   ├── useFaceLandmarker.ts     # MediaPipe integration (recording, scoring)
 │   │   ├── useSessionHistory.ts     # History state + Supabase sync
 │   │   ├── usePrepSession.ts        # Active session state machine
 │   │   ├── useBehavioralBank.ts     # Story bank state + Supabase sync
+│   │   ├── useCoffeeChats.ts        # Coffee-chat state + Supabase sync
 │   │   ├── useInterviewTimer.ts     # 2-minute countdown timer
 │   │   ├── useResume.ts             # Resume text persistence (localStorage)
 │   │   └── useAuth.ts               # Auth session listener
 │   └── lib/
 │       ├── faceLandmarker.ts        # MediaPipe model loader
 │       ├── prompts.ts               # Gemini feedback prompt builder
+│       ├── codeReviewPrompt.ts      # Gemini code-review prompt builder
+│       ├── codeRunner.ts            # In-browser JS/Python execution
+│       ├── leetcode.ts              # LeetCode fetch + parsing helpers
+│       ├── coffeeChats.ts           # Coffee-chat model + suggested questions
 │       ├── generalQuestions.ts      # 10 general behavioural questions
+│       ├── localData.ts             # Local-data clearing / owner reconciliation
+│       ├── constants.ts             # Shared constants
 │       ├── types.ts                 # Shared TypeScript types
+│       ├── database.types.ts        # Generated Supabase schema types
 │       ├── flags.ts                 # Feature flags
-│       └── supabase/                # Supabase client (browser + server)
+│       ├── utils.ts                 # Misc helpers
+│       └── supabase/                # Supabase client (browser, server, admin)
 ├── tests/
-│   └── e2e/
-│       └── practice.spec.ts         # 10 Playwright E2E tests
+│   ├── unit/                        # Vitest unit tests (api, lib, hooks, components)
+│   └── e2e/                         # Playwright E2E tests (practice, coffee-chats, auth, landing)
+├── supabase/                        # Supabase config & SQL migrations
+├── public/                          # Static assets (screenshots, demo videos)
+├── scripts/                         # One-off Node dev tools
 └── tasks/                           # Dev planning docs (handoff, lessons)
 ```
 
